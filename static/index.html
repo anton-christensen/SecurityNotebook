@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <title>LatticeViz</title>
+        <meta charset="utf-8">
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        
+        <script src="//d3js.org/d3.v5.min.js"></script>
+        <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+        <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
+        <style>
+            body {
+                background-color: #fafafa;
+            }
+            #code {
+                width: 40%;
+                margin: 1em;
+                height: 30%;
+            }
+            #graph {
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 50%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <Textarea id="code">a = [⊥ < ⊤]
+b = {1,2,3}
+
+c = b</Textarea>
+        <pre id="dot"></pre>
+        <div id="graph" style="text-align: center;"></div>
+        <script>
+            $(document).ready(function() {
+                $('#code').on('input', function() {
+                    $.post( "/api", $("#code").val(), function( data ) {
+                        $( "#dot" ).html( data );
+                        d3.select("#graph").graphviz().renderDot(data);
+                    });
+                });
+                $('#code').trigger('input');
+
+            });
+        </script>
+    </body>
+</html>
