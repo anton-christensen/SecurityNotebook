@@ -12,7 +12,7 @@ maintainer:          anton.christensen9700@gmail.com
 -- copyright:
 -- category:
 build-type:          Simple
-extra-source-files:  CHANGELOG.md
+extra-source-files:  
 cabal-version:       >=1.10
 
 executable latticeVis
