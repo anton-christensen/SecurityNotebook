@@ -6,28 +6,6 @@ import LatticeViz.Types
 import LatticeViz.DotGenerator
 import LatticeViz.Parser
 
--- main :: IO ()
--- main = do
---     let
---         set = ["x", "y", "z"]
---         poset = LatPoset [Pair "⊥" "-", Pair "-" "⊤"]
---         powerset = LatPowerset set
---         product = LatProduct powerset poset
---         map = LatMap set poset
---     graph <- latticeToGraph map
---     putStrLn $ printGraph graph
-
-
--- main :: IO ()
--- main = do
---     file <- getContents
---     case parseLatticeNotation file of
---         Left err -> putStrLn err
---         Right lattice -> do
---             graph <- latticeToGraph lattice
---             putStrLn $ printGraph graph
-
-
 import Snap.Core
 import Snap.Http.Server
 import Control.Monad.IO.Class
@@ -46,10 +24,9 @@ main = quickHttpServe $ route
 requestHandler :: Snap ()
 requestHandler = method POST $ do 
     body <- readRequestBody maxBodyLen
-    res <- liftIO $ case parseLatticeNotation $ BLU.toString body of
+    res <- liftIO $ case parseLatticeLanguage $ BLU.toString body of
         Left err -> return err
         Right lattice -> do
             graph <- latticeToGraph lattice
             return $ printGraph graph
     writeLBS $ BLU.fromString res
-     

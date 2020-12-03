@@ -1,0 +1,43 @@
+
+Statements = Statement Statements
+           | Statement
+
+Statement = Assignment
+           | Expression
+
+Assignment = Var '=' Expression
+
+Expression = Powerset
+           | Lift
+           | Map
+           | Product
+           | Value
+
+Value = '(' Expression ')' 
+      | Set
+      | Poset
+      | Var
+
+Powerset = 'P' '(' Expression ')'
+Lift     = 'Lift' '(' Expression ')' -- not implemented
+Map      = Value '->' Expression
+Product  = Value 'X' Expression
+Set      = '{' Vars '}' | '{' '}'
+Poset    = '[' Relations ']'
+
+Relations = Relation ',' Relations
+          | Relation
+Relation  = Var | Var '<' Relation
+
+Vars = Var ',' Vars
+     | Var
+
+Var = '"' <any string> '"'
+    | <any string without whitespace and reserved characters>
+
+
+
+Parser must check the following
+- Set: Set must not include duplicates
+- Poset: an element must not be related to itself
+- Map: Left side must be a set

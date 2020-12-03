@@ -4,7 +4,6 @@ import Data.UUID
 import LatticeViz.Types
 import Data.UUID.V4
 import Data.Map ((!), fromList, toList)
--- import Data.Monoid
 import Data.List 
 
 
@@ -19,7 +18,7 @@ printGraph g = unlines [
         printNames :: [(UUID, String)] -> String
         printNames names = unlines $ map (\(id, name) -> "    " ++ showid id ++ "[label=\"" ++ name ++ "\"]") names
         printRelations :: [(UUID, UUID)] -> String
-        printRelations relations = unlines $ map (\(from, to) -> "    " ++ showid from ++ " -> " ++ showid to ++ ";") relations 
+        printRelations relations = unlines $ map (\(under, over) -> "    " ++ showid over ++ " -> " ++ showid under ++ ";") relations 
         showid :: UUID -> String
         showid id = "ID" ++  filter (/= '-') (show id)
 
@@ -28,16 +27,16 @@ latticeToGraph (LatPowerset s) = do
     idmap <- mapM (\s -> nextRandom >>= (\id -> return (id,s)) ) (powerset s)
     let 
         names = map (\(id,s) -> (id,toSetNotation s)) idmap
-        relations = [(id1,id2) | (id1,s1) <- idmap, (id2,s2) <- idmap, length (s1 \\ s2) == 1 && length s1 == length s2 + 1]
+        relations = [(id1,id2) | (id1,s1) <- idmap, (id2,s2) <- idmap, length (s2 \\ s1) == 1 && (length s1 + 1) == length s2]
     return Graph {names=names, relations=relations}
 
-latticeToGraph (LatPoset relations) = do
+latticeToGraph (LatPoset (Poset set relations)) = do
     let 
-        symbols = nub $ [x | Pair x _ <- relations] ++ [x | Pair _ x <- relations]
+        symbols = set
     names_ <- mapM (\s -> nextRandom >>= (\id -> return (id,s)) ) symbols
     let
         nameMap = fromList $ map (\(a,b) -> (b,a)) names_
-        relations_ = map (\(Pair s1 s2) -> (nameMap ! s2, nameMap ! s1)) relations
+        relations_ = map (\(Pair s1 s2) -> (nameMap ! s1, nameMap ! s2)) relations
     return Graph {names=names_, relations=relations_}
 
 latticeToGraph (LatProduct lat1 lat2) = do
@@ -76,6 +75,17 @@ latticeToGraph (LatMap s lat) = do
                                     (fst $ nameMap ! (a,y), fst $ nameMap ! (b,y))] | (a,b) <- relations graph1, (x,y) <- relations graph2] 
                     combined = return Graph {names=map snd $ toList nameMap, relations=relations_}
                 combinePairwise (combined:xs)
+latticeToGraph (LatLift lat) = do
+    graph <- latticeToGraph lat
+    newBotID <- nextRandom
+
+    let 
+        allIDs = map fst $ names graph
+        leastElements = filter (\id -> Nothing == find (((==) id)  . snd) (relations graph)) allIDs
+        newBot = (newBotID,"⊥")
+        newRelations = [(newBotID,id) | id <- leastElements]
+    return $ graph {names=newBot:names graph, relations=newRelations ++ relations graph}
+
 
 pairOfNames :: [(UUID,String)] -> [(UUID,String)] -> IO [((UUID,UUID),(UUID,String))]
 pairOfNames a b = mapM (
