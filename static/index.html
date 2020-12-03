@@ -41,13 +41,16 @@
         </style>
     </head>
     <body>
-        <Textarea id="code">a = [⊥ < - < ⊤]
-b = {1,2}
-p = P(b)
-m = b -> a
-l = L(m)
-s = p ^ p
-s</Textarea>
+        <Textarea id="code">
+a = [ ⊥ < - < ⊤
+    , ⊥ < | < ⊤] // Custom lattice
+b = {1,2}        // Set
+p = P(b)         // Powerset lattice
+m = b -> a       // Map lattice
+l = L(m)         // Lift of lattice
+s = p ^ p        // Smash product
+s                // Last line is the output
+</Textarea>
         <pre id="dot"></pre>
         <div id="graph" style="text-align: center;"></div>
         <script>

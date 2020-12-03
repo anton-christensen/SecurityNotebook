@@ -6,6 +6,7 @@ import Text.Parsec.String
 import Data.Char
 import qualified Data.Map as M
 import Data.List
+import Data.Either
 
 ---
 
@@ -46,6 +47,13 @@ lineSpaces = skip $ many1 lineSpace
 anySpacesWithNewline :: Parser ()
 anySpacesWithNewline = optLineSpaces >> char '\n' >> optAnySpaces
 
+sepBy2 :: ParsecT s u m a1 -> ParsecT s u m a2 -> ParsecT s u m [a1]
+sepBy2 p sep = do 
+    x1 <- p
+    x2 <- sep >> p
+    xs <- many $ try (sep >> p)
+    return (x1:x2:xs)
+
 bracketParser :: Char -> Char -> Parser a -> Parser a
 bracketParser l r p = do
     char l >> optAnySpaces
@@ -54,7 +62,7 @@ bracketParser l r p = do
     return v
 
 seperatorParser :: String -> Parser ()
-seperatorParser s = optAnySpaces >> string s >> optAnySpaces
+seperatorParser s = try optAnySpaces >> string s >> optAnySpaces
 
 parseQuotedText :: Parser String
 parseQuotedText = do
@@ -75,7 +83,7 @@ parseSet =
 
 parseRelation :: Parser PRelation
 parseRelation = 
-    try (parseVar `sepBy` seperatorParser "<" >>= return . POrderedUnder) <|>
+    try (parseVar `sepBy2` seperatorParser "<" >>= return . POrderedUnder) <|>
         (parseVar >>= return . PUnordered)
 
 parsePoset :: Parser PPoset
@@ -154,6 +162,24 @@ parseStatements = do
     optAnySpaces
     return stms
 
+
+parseCommentLine :: Parser ()
+parseCommentLine = skip $ string "//" >> manyTill anyChar (lookAhead $ char '\n')
+parseCommentBlock :: Parser ()
+parseCommentBlock = skip $ string "/*" >> manyTill anyChar (string "*/")
+
+parseComments :: Parser String
+parseComments = 
+    let p = do {
+        notFollowedBy $ string "//";
+        -- notFollowedBy $ string "/*";
+        anyChar;
+    }
+    in many p `sepBy` parseCommentLine >>= return . concat
+
+removeComments :: String -> String
+removeComments input = fromRight input $ parse parseComments "" input
+
 ----------------------- ^ -----------------------
 -------------------- PARSERS --------------------
 -------------------------------------------------
@@ -165,7 +191,7 @@ parseStatements = do
 parseLatticeLanguage :: String -> Either String Lattice
 parseLatticeLanguage input = 
     either (Left . show) computeLattice
-        $ parse parseStatements "(Unknown)" (input++"\n")
+        $ parse parseStatements "(Unknown)" (removeComments input++"\n")
 
 computeLattice :: PStatements -> Either String Lattice
 computeLattice stms = 
