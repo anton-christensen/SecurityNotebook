@@ -2,6 +2,7 @@
     <head>
         <title>LatticeViz</title>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
         
         <script src="//d3js.org/d3.v5.min.js"></script>
@@ -40,12 +41,13 @@
         </style>
     </head>
     <body>
-        <Textarea id="code">a = [⊥ < ⊤]
-b = {1,2,3}
+        <Textarea id="code">a = [⊥ < - < ⊤]
+b = {1,2}
 p = P(b)
 m = b -> a
-l = L(p)
-l</Textarea>
+l = L(m)
+s = p ^ p
+s</Textarea>
         <pre id="dot"></pre>
         <div id="graph" style="text-align: center;"></div>
         <script>

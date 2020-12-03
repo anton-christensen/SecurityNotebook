@@ -18,12 +18,13 @@ Value = '(' Expression ')'
       | Poset
       | Var
 
-Powerset = 'P' '(' Expression ')'
-Lift     = 'Lift' '(' Expression ')' -- not implemented
-Map      = Value '->' Expression
-Product  = Value 'X' Expression
-Set      = '{' Vars '}' | '{' '}'
-Poset    = '[' Relations ']'
+Powerset     = 'P' '(' Expression ')'
+Lift         = 'L' '(' Expression ')'
+Map          = Value '->' Expression
+Product      = Value 'X' Expression
+SmashProduct = Value '^' Expression
+Set          = '{' Vars '}' | '{' '}'
+Poset        = '[' Relations ']'
 
 Relations = Relation ',' Relations
           | Relation

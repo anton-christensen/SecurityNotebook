@@ -94,48 +94,37 @@ parseSubExpression = try (parseParen >>= return . PSExprParen) <|>
              try (parseSet >>= return . PSExprSet) <|>
                  (parseVar >>= return . PSExprVar)
 
+
+unaryFunction :: String -> (PExpression -> PFunction) -> Parser PFunction
+unaryFunction prefixName function = string prefixName >> bracketParser '(' ')' parseExpression >>= return . function
+
+binaryFunction :: String -> (PSubExpression -> PExpression -> PFunction) -> Parser PFunction
+binaryFunction infixName function = do
+    lhs <- parseSubExpression
+    case lhs of
+        PSExprVar _ -> anySpaces
+        _         -> optAnySpaces
+    string infixName
+    optAnySpaces
+    rhs <- parseExpression
+    return $ function lhs rhs
+
+
 parseFunMap :: Parser PFunction
-parseFunMap = do
-    lhs <- parseSubExpression
-    case lhs of
-        PSExprVar _ -> anySpaces
-        _         -> optAnySpaces
-    string "->"
-    optAnySpaces
-    rhs <- parseExpression
-    return $ PFunMap lhs rhs
-
+parseFunMap = binaryFunction "->" PFunMap
 parseFunProduct :: Parser PFunction
-parseFunProduct = do
-    lhs <- parseSubExpression
-    case lhs of
-        PSExprVar _ -> anySpaces
-        _         -> optAnySpaces
-    char 'X'
-    optAnySpaces
-    rhs <- parseExpression
-    return $ PFunProduct lhs rhs
-
-
+parseFunProduct = binaryFunction "X" PFunProduct
+parseFunSmash :: Parser PFunction
+parseFunSmash = binaryFunction "^" PFunSmash
 parseFunLift :: Parser PFunction
-parseFunLift = do
-    string "L("
-    optAnySpaces
-    exp <- parseExpression
-    optAnySpaces
-    char ')'
-    return $ PFunLift exp
-
-
+parseFunLift = unaryFunction "L" PFunLift
 parseFunPowerset :: Parser PFunction
-parseFunPowerset = do
-    char 'P'
-    exp <- bracketParser '(' ')' parseExpression
-    return $ PFunPowerset exp
+parseFunPowerset = unaryFunction "P" PFunPowerset
 
 parseFunction :: Parser PFunction
 parseFunction = try parseFunPowerset <|>
                 try parseFunLift <|>
+                try parseFunSmash <|>
                 try parseFunProduct <|>
                     parseFunMap
 
@@ -190,6 +179,8 @@ parserLatticeToLattice (PLatPowerset s) = LatPowerset s
 parserLatticeToLattice (PLatLift pl) = LatLift $ parserLatticeToLattice pl
 parserLatticeToLattice (PLatProduct pl1 pl2) = 
     LatProduct (parserLatticeToLattice pl1) (parserLatticeToLattice pl2)
+parserLatticeToLattice (PLatSmash pl1 pl2) = 
+    LatSmashProduct (parserLatticeToLattice pl1) (parserLatticeToLattice pl2)
 parserLatticeToLattice (PLatMap s pl) = LatMap s (parserLatticeToLattice pl)
 parserLatticeToLattice (PLatPoset poset) = LatPoset poset
 
@@ -251,6 +242,15 @@ computeFunction (PFunProduct sexp exp) env =
         computeProduct (PVSet s1) (PVSet s2) = Right $ PVSet ["("++a++","++b++")" | a <- s1, b <- s2]
         computeProduct (PVLattice l1) (PVLattice l2) = Right $ PVLattice $ PLatProduct l1 l2
         computeProduct _ _  = Left "Can't find product of set with lattice.\n(Maybe you meant product of powerset and lattice)"
+computeFunction (PFunSmash sexp exp) env = 
+    let e1 = computeSubExpression sexp env
+        e2 = computeExpr exp env
+    in 
+        case (e1,e2) of 
+            (Left err, _) -> Left err
+            (_, Left err) -> Left err
+            (Right (PVLattice l1), Right (PVLattice l2)) -> Right $ PVLattice $ PLatSmash l1 l2
+            _ -> Left "Cannot calculate smash product of non-lattice"
 computeFunction (PFunMap sexp exp) env = 
     let e1 = computeSubExpression sexp env
         e2 = computeExpr exp env

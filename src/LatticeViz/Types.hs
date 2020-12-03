@@ -12,6 +12,7 @@ data Lattice
     | LatPowerset Set
     | LatMap Set Lattice
     | LatProduct Lattice Lattice
+    | LatSmashProduct Lattice Lattice
     | LatLift Lattice
     deriving (Show)
 
@@ -41,6 +42,7 @@ data PParen = PParen PExpression deriving (Show)
 data PFunction = PFunPowerset PExpression
                | PFunLift PExpression
                | PFunProduct PSubExpression PExpression
+               | PFunSmash PSubExpression PExpression
                | PFunMap PSubExpression PExpression
                deriving (Show)
 
@@ -71,5 +73,6 @@ data PLattice
     = PLatPowerset Set
     | PLatLift PLattice
     | PLatProduct PLattice PLattice
+    | PLatSmash PLattice PLattice
     | PLatMap Set PLattice
     | PLatPoset Poset

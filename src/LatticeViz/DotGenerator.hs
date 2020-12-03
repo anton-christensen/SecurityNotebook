@@ -7,6 +7,10 @@ import Data.Map ((!), fromList, toList)
 import Data.List 
 
 
+import Data.List (sortBy)
+import Data.Function (on)
+
+
 printGraph :: Graph -> String
 printGraph g = unlines [
     "digraph G {",
@@ -16,7 +20,7 @@ printGraph g = unlines [
     "  "] ++ printNames (names g) ++ printRelations (relations g) ++ "\n}"
     where
         printNames :: [(UUID, String)] -> String
-        printNames names = unlines $ map (\(id, name) -> "    " ++ showid id ++ "[label=\"" ++ name ++ "\"]") names
+        printNames names = unlines $ map (\(id, name) -> "    " ++ showid id ++ "[label=\"" ++ name ++ "\"]") (sortBy (compare `on` snd) names)
         printRelations :: [(UUID, UUID)] -> String
         printRelations relations = unlines $ map (\(under, over) -> "    " ++ showid over ++ " -> " ++ showid under ++ ";") relations 
         showid :: UUID -> String
@@ -42,6 +46,23 @@ latticeToGraph (LatPoset (Poset set relations)) = do
 latticeToGraph (LatProduct lat1 lat2) = do
     graph1 <- latticeToGraph lat1
     graph2 <- latticeToGraph lat2
+    productOfGraphs graph1 graph2
+latticeToGraph (LatSmashProduct lat1 lat2) = do
+    graph1_ <- latticeToGraph lat1
+    graph2_ <- latticeToGraph lat2
+    let
+        graph1 = graphCutLeastElements graph1_
+        graph2 = graphCutLeastElements graph2_
+    productGraph <- productOfGraphs graph1 graph2
+    liftGraph productGraph
+
+latticeToGraph (LatMap s lat) = latticeToGraph lat >>= mapSetToGraph s
+latticeToGraph (LatLift lat) = latticeToGraph lat >>= liftGraph
+
+
+
+productOfGraphs :: Graph -> Graph -> IO Graph
+productOfGraphs graph1 graph2 = do
     nameMap <- pairOfNames (names graph1) (names graph2) >>= return . fromList
     let 
         relations_ = nub $ concat $
@@ -51,15 +72,14 @@ latticeToGraph (LatProduct lat1 lat2) = do
                         (fst $ nameMap ! (a,y), fst $ nameMap ! (b,y))] | (a,b) <- relations graph1, (x,y) <- relations graph2] 
 
     return Graph {names=map ((\(id,name) -> (id,"("++name++")")) . snd) $ toList nameMap, relations=relations_}
-latticeToGraph (LatMap s lat) = do
-    graph <- latticeToGraph lat
-    let graphs = [return graph {names=[(id,elm++"↦"++name) | (id,name) <- names graph]} | elm <- s]
 
+
+mapSetToGraph :: Set -> Graph -> IO Graph
+mapSetToGraph s graph = do
+    let graphs = [return graph {names=[(id,elm++"↦"++name) | (id,name) <- names graph]} | elm <- s]
     combinedGraph <- combinePairwise graphs
     return combinedGraph {names=[(id,"["++name++"]") | (id,name) <- names combinedGraph]}
-
         where
-
             combinePairwise :: [IO Graph] -> IO Graph
             combinePairwise []         = return Graph{names=[],relations=[]}
             combinePairwise [x]        = x
@@ -75,10 +95,10 @@ latticeToGraph (LatMap s lat) = do
                                     (fst $ nameMap ! (a,y), fst $ nameMap ! (b,y))] | (a,b) <- relations graph1, (x,y) <- relations graph2] 
                     combined = return Graph {names=map snd $ toList nameMap, relations=relations_}
                 combinePairwise (combined:xs)
-latticeToGraph (LatLift lat) = do
-    graph <- latticeToGraph lat
-    newBotID <- nextRandom
 
+liftGraph :: Graph -> IO Graph
+liftGraph graph = do
+    newBotID <- nextRandom
     let 
         allIDs = map fst $ names graph
         leastElements = filter (\id -> Nothing == find (((==) id)  . snd) (relations graph)) allIDs
@@ -86,6 +106,14 @@ latticeToGraph (LatLift lat) = do
         newRelations = [(newBotID,id) | id <- leastElements]
     return $ graph {names=newBot:names graph, relations=newRelations ++ relations graph}
 
+graphCutLeastElements :: Graph -> Graph
+graphCutLeastElements g = 
+    let 
+        allIDs = map fst $ names g
+        leastElements = filter (\id -> Nothing == find (((==) id)  . snd) (relations g)) allIDs
+        newNames = filter ((`notElem` leastElements) . fst) $ names g
+        newRelations = filter ((`notElem` leastElements) . fst) $ relations g
+    in  g {names=newNames, relations=newRelations}
 
 pairOfNames :: [(UUID,String)] -> [(UUID,String)] -> IO [((UUID,UUID),(UUID,String))]
 pairOfNames a b = mapM (
