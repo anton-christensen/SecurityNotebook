@@ -62,7 +62,7 @@ bracketParser l r p = do
     return v
 
 seperatorParser :: String -> Parser ()
-seperatorParser s = try optAnySpaces >> string s >> optAnySpaces
+seperatorParser s = try (optAnySpaces >> string s >> optAnySpaces)
 
 parseQuotedText :: Parser String
 parseQuotedText = do

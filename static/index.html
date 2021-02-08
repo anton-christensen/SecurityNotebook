@@ -1,97 +1,46 @@
 <html>
-    <head>
-        <title>LatticeViz</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-        
-        <script src="//d3js.org/d3.v5.min.js"></script>
-        <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
-        <script src="https://unpkg.com/d3-graphviz@3.1.0/build/d3-graphviz.js"></script>
-        <style>
-            body,html {
-                width: 100%;
-                height: 100%;
-                position: relative;
-                margin:0;
-                padding:0;
-            }
-            body {
-                background-color: #fafafa;
-            }
-            #code {
-                width: 40%;
-                margin: 1em;
-                height: 30%;
-            }
-            #dot {
-                max-width: 50%;
-            }
-            #graph {
-                position: absolute;
-                right: 0;
-                top: 0;
-                width: 50%;
-                height: 100%;
-            }
-            #graph > svg {
-                width: 100%;
-                height: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        <Textarea id="code">
-a = [ ⊥ < - < ⊤
-    , ⊥ < | < ⊤] // Custom lattice
-b = {1,2}        // Set
-p = P(b)         // Powerset lattice
-m = b -> a       // Map lattice
-l = L(m)         // Lift of lattice
-s = p ^ p        // Smash product
-s                // Last line is the output
-</Textarea>
-        <pre id="dot"></pre>
-        <div id="graph" style="text-align: center;"></div>
-        <script>
-            var graphviz;
-            $(document).ready(function() {
-                graphviz = d3.select("#graph").graphviz()
-                    .attributer(attributer)
+<head>
+  <title>Code Analysis</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  
+  <!-- graphviz for dot diagrams -->
+  <script src="//d3js.org/d3.v5.min.js"></script>
+  <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+  <script src="https://unpkg.com/d3-graphviz@3.1.0/build/d3-graphviz.js"></script>
 
-                $('#code').on('input', function() {
-                    $.post( "/api", $("#code").val(), function( data ) {
-                        $( "#dot" ).html( data );
-                        if(data.indexOf("digraph") === 0) {
-                            $("#dot").css("color","black");
+  <!-- code text editor -->
+  <script src="https://unpkg.com/codemirror@5.59.2/lib/codemirror.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.59.2/lib/codemirror.css">
+  
+  <!-- markdown compiler -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-                            graphviz.renderDot(data)
-                            .on("end", function () {
-                                resetZoom();
-                            })
-                        }
-                        else {
-                            $("#dot").css("color","red");
-                        }
-                    });
-                });
-
-                $('#code').trigger('input');
-            });
-
-            function attributer(datum, index, nodes) {
-                var selection = d3.select(this);
-                if (datum.tag == "svg") {
-                    var width = $('#graph').width();
-                    var height = $('#graph').height();
-                    datum.attributes.width = width;
-                    datum.attributes.height = height;
-                }
-            }
-
-            function resetZoom() {
-                graphviz.resetZoom(d3.transition().duration(250));
-            }
-        </script>
-    </body>
+  <!-- mathjax for latex math -->
+  <!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> -->
+  <!-- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_HTML"></script>
+  
+  
+  
+  <script src="/static/main.js" type="module"></script>
+  <!--
+    To prevent waterfall-loading, we preload
+    all the JS Module files of our application.
+  -->
+  <link rel="modulepreload" href="/static/components/App.js">
+  <link rel="modulepreload" href="/static/components/Analysis.js">
+  <link rel="modulepreload" href="/static/components/generic/GraphvizDisplay.js">
+  <link rel="modulepreload" href="/static/components/generic/MarkdownDisplay.js">
+  <link rel="modulepreload" href="/static/components/generic/CodeInput.js">
+  
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="app">
+  </div>
+</body>
 </html>
+

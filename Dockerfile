@@ -16,4 +16,4 @@ WORKDIR /app
 COPY --from=build /root/.cabal/bin/* /app/
 COPY ./static ./static
 
-CMD [ "./latticeVis" ]
+CMD [ "./webAnalysis" ]
