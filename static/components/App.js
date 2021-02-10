@@ -4,16 +4,19 @@ export default {
   el: '#app',
   template: `
     <div id="app">
-    <button v-on:click="saveDocument">Save</button>
-    <button v-on:click="loadDocument">Load</button>
-    <button v-on:click="exportDocument">Export</button>
-    <button v-on:click="importDocument">Import</button>
-    <a ref="downloadAnchor" style="display:none"></a>
-    <input ref="importFile" type="file" style="display:none"></input>
-    <div id="notebookElements">
+      <button v-on:click="saveDocument">Save</button>
+      <button v-on:click="loadDocument">Load</button>
+      <button v-on:click="exportDocument">Export</button>
+      <button v-on:click="importDocument">Import</button>
+
+      <!-- hidden elements to trigger download and file dialog -->
+      <a ref="downloadAnchor" style="display:none"></a>
+      <input ref="importFile" type="file" style="display:none"></input>
+      
+      <div id="notebookElements">
         <div class="notebook-component" v-for="element in elements">
           <span class="name">#{{element.id}} - {{ element.name }}</span>
-          <span class="deleteComponent" v-on:click="deleteComponent(element.id)">x</span>
+          <span class="deleteComponent" v-on:click="deleteComponent(element.id)"><i class="fas fa-trash"></i></span>
           <component 
             :key="element.id" 
             :ref="element.id" 

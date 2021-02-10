@@ -82,3 +82,39 @@ body {
 .clear {
   clear:both;
 }
+
+.hide {
+  display: none;
+}
+
+.hideToggle {cursor: pointer;}
+
+.hideToggle.shown  .shown-icon,
+.hideToggle.hidden .hidden-icon {
+  display: inline-block;
+}
+
+.hideToggle.hidden .shown-icon,
+.hideToggle.shown  .hidden-icon {
+  display: none;
+}
+
+.hideToggle.shown:hover  .hidden-icon,
+.hideToggle.hidden:hover .shown-icon {
+  display: inline-block;
+}
+
+.hideToggle.hidden:hover .hidden-icon,
+.hideToggle.shown:hover  .shown-icon {
+  display: none;
+}
+
+
+.deleteComponent {
+  color: grey;
+  transition: color .1s;
+}
+
+.deleteComponent:hover {
+  color: red;
+}
