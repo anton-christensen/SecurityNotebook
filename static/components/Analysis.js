@@ -15,7 +15,7 @@ export default {
       <button v-on:click="req.stepCount = -1; update()" v-bind:disabled="req.stepCount >= maxSteps" >>></button>
       <br>
       <span>step {{ req.stepCount }}</span>
-      <pre ref="dot" class="dot" v-bind:style="{color: response.success ? 'black' : 'red'}">{{response.msg}}</pre>
+      <pre ref="dot" class="dot" v-bind:class="{red: !response.success}">{{response.msg}}</pre>
 
       <GraphvizDisplay v-bind:dot="response.dot"></GraphvizDisplay>
     </div>

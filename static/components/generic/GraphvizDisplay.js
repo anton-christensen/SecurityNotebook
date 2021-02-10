@@ -20,10 +20,9 @@ export default {
     attributer: function(datum, index, nodes) {
       d3.select(this);
       if (datum.tag == "svg") {
-        var width = $(this.$refs.graph).width();
-        var height = $(this.$refs.graph).height();
-        datum.attributes.width = width;
-        datum.attributes.height = height;
+        var dim = this.$refs.graph.getBoundingClientRect();
+        datum.attributes.width = dim.width;
+        datum.attributes.height = dim.height;
       }
     },
   },
