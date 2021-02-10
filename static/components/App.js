@@ -6,6 +6,10 @@ export default {
     <div id="app">
     <button v-on:click="saveDocument">Save</button>
     <button v-on:click="loadDocument">Load</button>
+    <button v-on:click="exportDocument">Export</button>
+    <button v-on:click="importDocument">Import</button>
+    <a ref="downloadAnchor" style="display:none"></a>
+    <input ref="importFile" type="file" style="display:none"></input>
     <div id="notebookElements">
         <div class="notebook-component" v-for="element in elements">
           <span class="name">#{{element.id}} - {{ element.name }}</span>
@@ -104,6 +108,27 @@ export default {
     loadDocument: function() {
       var doc = JSON.parse(localStorage.getItem('doc'));
       this.setDocument(doc);
+    },
+    exportDocument: function() {
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.getDocument()));
+      var dlAnchorElem = this.$refs.downloadAnchor;
+      dlAnchorElem.setAttribute("href",     dataStr     );
+      dlAnchorElem.setAttribute("download", "notebook.json");
+      dlAnchorElem.click();
+    },
+    importDocument: function() {
+      var self = this;
+      var importFileElm = this.$refs.importFile;
+      importFileElm.onchange = () => {
+        if(importFileElm.value) {
+          var fr = new FileReader();
+          fr.onload = () => {
+            self.setDocument(JSON.parse(fr.result))
+          }
+          fr.readAsText(importFileElm.files[0]);
+        }
+      }
+      importFileElm.click();
     },
   },
   mounted: function() {
