@@ -1,6 +1,6 @@
 {-#LANGUAGE GADTs #-}
-module LatticeViz.Parser (parseLatticeLanguage) where
-import LatticeViz.Types
+module Language.LatticeViz.Parser (parseLatticeLanguage) where
+import Language.LatticeViz.Types
 import Text.Parsec hiding (Line)
 import Text.Parsec.String
 import Data.Char

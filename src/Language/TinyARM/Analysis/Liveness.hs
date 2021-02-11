@@ -1,8 +1,10 @@
 module Language.TinyARM.Analysis.Liveness where
 
-import Language.TinyARM.Analysis
+import Analysis
 import Language.TinyARM.Language
+import Language.TinyARM.Analysis
 import Language.TinyARM.CFG
+import CFG
 
 import Data.Lattice
 import Data.List
@@ -15,11 +17,11 @@ type LiveLatticeElem = S.Set Register
 prettyPrintState :: LiveLatticeElem -> String
 prettyPrintState s = "{" ++ (intercalate ", " $ map show $ S.toList s) ++ "}"
 
-livenessAnalysis :: Int -> CFG -> AnalysisResult LiveLatticeElem
+livenessAnalysis :: Int -> TinyArmCFG -> TinyArmAnalysisResult LiveLatticeElem
 livenessAnalysis n cfg = 
   worklistAlgorithmSimpleBackwards n cfg initialState join transfer
   where
-    initialState :: M.Map CFGKey LiveLatticeElem
+    initialState :: M.Map TinyArmCFGLabel LiveLatticeElem
     initialState = M.map (\_ -> bottom) cfg
 
     bottom :: LiveLatticeElem
@@ -29,7 +31,7 @@ livenessAnalysis n cfg =
     join [] = bottom
     join (x:xs) = ljoin x $ join xs
 
-    transfer :: CFGKey -> CFGNode -> LiveLatticeElem -> LiveLatticeElem
+    transfer :: TinyArmCFGLabel -> TinyArmCFGNode -> LiveLatticeElem -> LiveLatticeElem
     -- (IN U GenSet(instr)) / KillSet(instr)
     transfer l (NDefault i)     inState = S.union (genSet i) $ S.filter (flip S.notMember $ killSet i) inState
     transfer _ (NBranch _)      inElm = inElm

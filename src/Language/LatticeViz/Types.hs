@@ -1,4 +1,4 @@
-module LatticeViz.Types where
+module Language.LatticeViz.Types where
 
 import Data.UUID
 

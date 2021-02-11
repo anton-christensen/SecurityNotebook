@@ -6,7 +6,7 @@
 {-# LANGUAGE GADTs #-}
 module Language.TinyARM.Language where
 
-import Language.TinyARM.Common
+import Common
 
 import Prelude hiding (EQ,LT,GT)
 import Data.Word
@@ -125,7 +125,10 @@ instance Functor Instruction where
 -- From here on, things pertain to the assembly language more than the core language itself
 --
 
-data SpecialInstructions = HALT String deriving (Eq,Ord,Read,Show)
+data SpecialInstructions 
+  = HALT String 
+  | COND Condition
+  deriving (Eq,Ord,Read,Show)
 
 type Instr = Instruction SpecialInstructions
 type Code = M.Map Address Instr

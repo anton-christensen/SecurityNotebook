@@ -18,17 +18,26 @@ cabal-version:       >=1.10
 executable webAnalysis
   main-is:             Main.hs
   other-modules: 
-    LatticeViz.Types,
-    LatticeViz.DotGenerator,
-    LatticeViz.Parser,
-    Language.While.Parser,
+    
+    CFG,
+    Common,
+    Analysis,
+
+    
+    Language.LatticeViz,
+    Language.LatticeViz.Types,
+    Language.LatticeViz.DotGenerator,
+    Language.LatticeViz.Parser,
+    
     Language.While.Language,
+    Language.While.Parser,
+    Language.While.Interpreter,
+    Language.While.CFG,
+
     Language.TinyARM,
     Language.TinyARM.Parser,
     Language.TinyARM.Language,
     Language.TinyARM.CFG,
-    Language.TinyARM.Common,
-    Language.TinyARM.Analysis,
     Language.TinyARM.Analysis.Types,
     Language.TinyARM.Analysis.ReachingDefinitions,
     Language.TinyARM.Analysis.Liveness
@@ -45,7 +54,9 @@ executable webAnalysis
     text,
     OddWord,
     orders,
-    strings
+    strings,
+    mtl,
+    haskeline
   hs-source-dirs:      src
   default-language:    Haskell2010
   data-files: static/*

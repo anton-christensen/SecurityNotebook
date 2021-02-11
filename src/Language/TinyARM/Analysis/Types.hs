@@ -2,7 +2,7 @@ module Language.TinyARM.Analysis.Types where
 
 import Data.Lattice
 import Language.TinyARM.Language
-import Language.TinyARM.Common
+import Common
 import Data.Strings
 
 import Debug.Trace

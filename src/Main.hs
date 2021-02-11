@@ -6,14 +6,12 @@
 
 module Main where
 
-import LatticeViz.Types
-import LatticeViz.DotGenerator
-import LatticeViz.Parser
-
 import Text.Parsec.Error
 
 import Language.TinyARM
 import Language.TinyARM.CFG
+
+import Language.LatticeViz
 
 -- import TinyARM.Parser
 -- import Language.While.Parser
@@ -38,7 +36,7 @@ data AnalysisResponse = AnalysisResponse
     stepsTaken :: Int
   , success :: Bool
   } deriving (Show, Generic, ToJSON, FromJSON)
-analysisResponse :: GenericAnalysisResult -> AnalysisResponse
+analysisResponse :: (Show l, Show p) => GenericAnalysisResult l p -> AnalysisResponse
 analysisResponse g = AnalysisResponse 
       { dot=gaDotGraph g
       , worklist=show $ gaWorkList g
@@ -56,12 +54,33 @@ errResponse msg = AnalysisErrResponse { message=msg, success=False }
 
 maxBodyLen = 1000000
 
+
+
+
+
+data APIResponse = APIErrorReponse String
+                 | APISuccessResponse 
+                 deriving (Show, Generic, ToJSON, FromJSON)
+
+
+
+
 main :: IO ()
 main = quickHttpServe $ route 
-  [ ("/",       serveFile "static/index.html")
-  , ("/static", serveDirectory "static")
-  , ("/api",    requestHandler)
+  [ ("/",             serveFile "static/index.html")
+  , ("/static",       serveDirectory "static")
+  , ("/api",          requestHandler)
+  , ("/api/lattice",  reqHandlerLattice)
   ]
+
+
+reqHandlerLattice :: Snap ()
+reqHandlerLattice = method POST $ do 
+    body <- readRequestBody maxBodyLen
+    res <- liftIO $ case latticeGraph $ BLU.toString body of
+        Left err -> return err
+        Right graphString -> graphString
+    writeLBS $ BLU.fromString res
 
 requestHandler :: Snap ()
 requestHandler = method POST $ do 

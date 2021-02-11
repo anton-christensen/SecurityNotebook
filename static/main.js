@@ -6,6 +6,7 @@ import Markdown from './components/Markdown.js';
 import TextInput from './components/TextInput.js';
 import TextOutput from './components/TextOutput.js';
 import AnalysisOutput from './components/AnalysisOutput.js';
+import LatticeOutput from './components/LatticeOutput.js';
 import MarkdownOutput from './components/MarkdownOutput.js';
 
 
@@ -20,6 +21,7 @@ Vue.component('Markdown', Markdown);
 Vue.component('TextInput', TextInput);
 Vue.component('TextOutput', TextOutput);
 Vue.component('AnalysisOutput', AnalysisOutput);
+Vue.component('LatticeOutput', LatticeOutput);
 Vue.component('MarkdownOutput', MarkdownOutput);
 
 Vue.component('GraphvizDisplay', GraphvizDisplay);

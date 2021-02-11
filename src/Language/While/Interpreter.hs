@@ -4,16 +4,16 @@
 --
 ----------------------------------------------------------------------
 {-#LANGUAGE GADTs #-}
-module While.Interpreter where
+module Language.While.Interpreter where
 
 import qualified Data.Map as M
 import qualified Control.Monad.State as S
 import Control.Monad.State (gets,modify)
 import Control.Monad.Except
 
-import While.Language
+import Language.While.Language
 import Text.Parsec.Pos
-import qualified While.Parser as Parser (parseProgramFile,parseProgram)
+import qualified Language.While.Parser as Parser (parseProgramFile,parseProgram)
 
 import System.Console.Haskeline
 
@@ -387,7 +387,7 @@ evalCmd (FREE e1 e2) = do
   free p 0
   return []
 evalCmd (INPUT x y) = do
-  v <- memget ("_INPUT_" ++ y)
+  v <- memget ("" ++ y)
   output $ "INPUT (on channel " ++ y ++ ")"
   memset x v
   return []

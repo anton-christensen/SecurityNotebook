@@ -1,4 +1,4 @@
-module Language.TinyARM.Common where
+module Common where
 
 import Numeric
 import Data.Bits

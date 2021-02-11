@@ -43,6 +43,7 @@ export default {
       {value: "text-output", text: "Text Output"},
       {value: "markdown-output", text: "Markdown Output"},
       {value: "analysis-output", text: "Analysis Output"},
+      {value: "lattice-output", text: "Lattice Output"},
     ],
     selected: '',
     id: 0,

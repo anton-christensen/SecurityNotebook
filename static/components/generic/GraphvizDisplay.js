@@ -22,7 +22,8 @@ export default {
       if (datum.tag == "svg") {
         var dim = this.$refs.graph.getBoundingClientRect();
         datum.attributes.width = dim.width;
-        datum.attributes.height = dim.height;
+        datum.attributes.height = parseInt(datum.attributes.viewBox.split(' ')[3])*1.1;// dim.height;
+        
       }
     },
   },

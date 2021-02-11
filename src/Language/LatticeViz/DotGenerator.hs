@@ -1,7 +1,7 @@
-module LatticeViz.DotGenerator where
+module Language.LatticeViz.DotGenerator where
 
 import Data.UUID
-import LatticeViz.Types
+import Language.LatticeViz.Types
 import Data.UUID.V4
 import Data.Map ((!), fromList, toList)
 import Data.List 
