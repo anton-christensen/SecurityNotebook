@@ -4,34 +4,62 @@ export default {
   el: '#app',
   template: `
     <div id="app">
-      <button v-on:click="saveDocument">Save</button>
-      <button v-on:click="loadDocument">Load</button>
-      <button v-on:click="exportDocument">Export</button>
-      <button v-on:click="importDocument">Import</button>
-
       <!-- hidden elements to trigger download and file dialog -->
       <a ref="downloadAnchor" style="display:none"></a>
       <input ref="importFile" type="file" style="display:none"></input>
       
-      <div id="notebookElements">
-        <div class="notebook-component" v-for="element in elements">
-          <span class="name">#{{element.id}} - {{ element.name }}</span>
-          <span class="deleteComponent" v-on:click="deleteComponent(element.id)"><i class="fas fa-trash"></i></span>
-          <component 
-            :key="element.id" 
-            :ref="element.id" 
-            :is="element.name"   
-            v-bind:others="$refs"
-          ></component>
+      <div class="header">
+        <div class="main-container">
+          <div class="fl">
+            <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
+          </div>
+          <div class="fr">
+            <button v-on:click="saveDocument">Save</button>
+            <button v-on:click="loadDocument">Load</button>
+            <button v-on:click="exportDocument">Export</button>
+            <button v-on:click="importDocument">Import</button>
+          </div>
         </div>
       </div>
 
-      <span>Add component</span>
-      <select v-model="selected">
-        <option v-for="analysis in analyses" v-bind:value="analysis.value">
-          {{ analysis.text }}
-        </option>
-      </select>
+      
+      <div class="main-container">
+        <div id="notebookElements">
+          <div class="notebook-component" v-for="element in elements">
+            <div class="notebook-component-shoulder leftof">
+              <div class="notebook-component-fold hideToggle" v-on:click="element.hidden = !element.hidden" v-bind:class="{hidden: element.hidden, shown: !element.hidden}">
+                <i class="fas fa-eye-slash hidden-icon" ></i>
+                <i class="fas fa-eye shown-icon"></i>
+              </div>
+              <div class="notebook-component-add before"></div>
+              <div class="notebook-component-add after"></div>
+            </div>
+            <div class="notebook-component-shoulder rightof">
+              <span class="notebook-component-remove" v-on:click="deleteComponent(element.id)"><i class="fas fa-trash"></i></span>
+            </div>
+            
+            <span class="name">#{{element.id}} - </span>
+            <input class="alias" v-model="element.alias" placeholder="Alias" />
+            <span class="name fr">{{ element.type }}</span>
+            <div class="notebook-component-content" v-bind:class="{hide: element.hidden}">
+              <component 
+                :key="element.id" 
+                :alias="element.alias"
+                :ref="element.id" 
+                :is="element.type"   
+                v-bind:others="$refs"
+              ></component>
+            </div>
+          </div>
+        </div>
+
+        <span>Add component</span>
+        <select v-model="selected">
+          <option v-for="analysis in analyses" v-bind:value="analysis.value">
+            {{ analysis.text }}
+          </option>
+        </select>
+      </div>
     </div>
   `,
   data: {
@@ -47,6 +75,7 @@ export default {
     ],
     selected: '',
     id: 0,
+    title: 'Security Analysis Notebook',
 
     elements: [],
   },
@@ -59,12 +88,18 @@ export default {
     }
   },
   methods: {
+    onTitleInput: function(e) {
+      this.title = e.target.textContent;
+
+    },
     addComponent: function(componentName) {
       var id = this.id++;
       this.elements.push(
         {
           id: id,
-          name: componentName, 
+          alias: "",
+          type: componentName,
+          hidden: false,
         }
       );
     },
@@ -77,6 +112,7 @@ export default {
     getDocument: function() {
       var doc = {
         nextID: this.id,
+        title: this.title,
         elements: JSON.parse(JSON.stringify(this.elements)),
       };
       
@@ -93,11 +129,18 @@ export default {
       this.elements = [];
       
       this.id = doc.nextID;
+      this.title = doc.title;
+      this.$refs.title.textContent = doc.title;
       for(var i = 0; i < doc.elements.length; i++) {
-        this.elements.push({
+        this.elements.push ({
           id: doc.elements[i].id,
-          name: doc.elements[i].name
+          alias: doc.elements[i].alias,
+          type: doc.elements[i].type,
+          hidden: false,
         });
+        setTimeout((function() {
+          self.elements[this.i].hidden = this.h;
+        }).bind({i: this.elements.length-1,h: doc.elements[i].hidden}), 10);
       }
       
       setTimeout(function() {
@@ -116,8 +159,9 @@ export default {
     exportDocument: function() {
       var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.getDocument()));
       var dlAnchorElem = this.$refs.downloadAnchor;
+      var filename = this.title.trim().replaceAll(' ', '-');
       dlAnchorElem.setAttribute("href",     dataStr     );
-      dlAnchorElem.setAttribute("download", "notebook.json");
+      dlAnchorElem.setAttribute("download", filename+".json");
       dlAnchorElem.click();
     },
     importDocument: function() {

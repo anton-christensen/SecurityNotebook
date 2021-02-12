@@ -9,7 +9,7 @@ export default {
   props: ['others'],
   computed: {
     text: function() {
-      return this.textref ? this.textref.text : "error";
+      return this.textref ? this.textref.text : "<span class='red'>missing component reference</span>";
     }
   },
   data: () => Object({

@@ -6,7 +6,7 @@ export default {
       <br>
       <pre ref="dot" class="dot" v-bind:class="{red: !response.success}">{{response.msg}}</pre>
       
-      <GraphvizDisplay v-bind:dot="response.dot"></GraphvizDisplay>
+      <GraphvizDisplay v-bind:dot="response.dot" v-bind:negpadding="60"></GraphvizDisplay>
     </div>
     `,
     props: ['others'],
@@ -38,7 +38,6 @@ export default {
         };
       },
       setState: function(s) {
-        console.log("analysis set state",s);
         this.$refs.binding.setState(s.binding);
         this.update();
       },

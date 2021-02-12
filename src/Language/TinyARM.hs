@@ -14,8 +14,6 @@ import qualified Language.TinyARM.Analysis.ReachingDefinitions as RD
 import qualified Language.TinyARM.Analysis.Liveness as L
 
 
-
-
 _analysis :: (Show a) => (Int -> TinyArmCFG -> TinyArmAnalysisResult a) -> (a -> String) -> Program -> Int -> TinyArmGenericAnalysisResult
 _analysis analysis statePrinter program nSteps = 
     let result = analysis nSteps $ makeCFG program 

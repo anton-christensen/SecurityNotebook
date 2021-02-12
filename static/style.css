@@ -1,5 +1,5 @@
 .red {
-  color: red;
+  color: #f2c1c2 !important;
 }
 
 body,html {
@@ -8,36 +8,146 @@ body,html {
   position: relative;
   margin:0;
   padding:0;
+
+
+
   font-size: 12pt;
-}
-body {
-  background-color: #fafafa;
+  font-family: 'Vollkorn', 'Open Sans', serif;
+
+  background-color: white;
+  color: #404040;
 }
 
 #app {
+  padding-bottom: 2rem;
+}
+
+input, select, button {
+  font-family: 'Open Sans';
+}
+
+button {
+  border-width: 0;
+  transition: background-color .1s;
+  background-color: #8da7c1;
+  color: white;
+  font-weight: bold;
+  border-radius: 0.2rem;
+  padding: 0.2rem .5rem;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #8da7c1cc;
+}
+button:active, button:focus  {
+  border-width: 0;
+  outline: none;
+}
+
+.main-container {
   max-width: 960px;
+  width: 90%;
   margin: auto;
-  background: white;
-  padding: 2rem;
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+
+.header {
+  clear: both;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e5e5e5;
+  background-color: #fefefe;
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  display: inline;
+}
+
+
+.notebookElements {
+  margin-top: 1rem;
 }
 
 .notebook-component {
-  border-bottom: 1px solid grey;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
   position: relative;
 }
 .notebook-component .name {
-  color: grey;
+  color: #e5e5e5;
   font-size: 0.75rem;
-  font-family: monospace;
+  font-family: 'Roboto Mono';
 }
 
-.notebook-component .deleteComponent {
+.notebook-component .alias {
+  transition: border-color .25s;
+  border: 1px solid transparent;
+  border-right: 0;
+  border-top: 0;
+  border-left: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: .8rem;
+  color: #8da7c1;
+  outline: 0;
+}
+.notebook-component .alias::placeholder {
+  opacity: 0;
+  transition: opacity .25s;
+}
+
+
+.notebook-component:hover .alias {
+  border-color: #e5e5e5;
+}
+.notebook-component:hover .alias::placeholder { opacity: 0.25; }
+
+.notebook-component .alias:focus {
+  border-color: #c0c0c0;
+}
+.notebook-component .alias:focus::placeholder { opacity: 5; }
+
+.notebook-component-shoulder {
   position: absolute;
-  right: 0;
-  top: -0.2rem;
+  top: 0.1rem;
+}
+.notebook-component-shoulder.leftof  { left:  -1.5rem; }
+.notebook-component-shoulder.rightof { right: -1.5rem; }
+
+
+.notebook-component-fold, .notebook-component-remove {
+  color: #404040;
+  transition: color .1s, opacity .25s;
+  opacity: 0;
   cursor: pointer;
+}
+
+.notebook-component:hover .notebook-component-fold, 
+.notebook-component:hover .notebook-component-remove {
+  opacity: 0.25;
+}
+.notebook-component-fold:hover, 
+.notebook-component-remove:hover {
+  opacity: 1 !important;
+}
+
+
+.notebook-component-remove:hover {
+  color: #c4383a;
+}
+
+.notebook-component-content {
+  margin-top: .5rem;
 }
 
 /* .component {
@@ -68,11 +178,58 @@ body {
   /* height: 100%; */
 }
 
+
+h1:focus {
+  outline: 0;
+  border-bottom: 2px dotted;
+}
+
+.markdownDisplay pre, .markdownDisplay p code {
+  padding: .2rem;
+  background-color: #f7f7f7;
+  color: #404040;
+  font-size: .8rem;
+  border-radius: .2rem;
+}
+.markdownDisplay p code {
+  padding: .2rem .4rem;
+}
+
+.component-ref:focus {
+  opacity: 1;
+}
+.component-ref { 
+  opacity: 0.5;
+  transition: 0.2s opacity;   
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  font-size: 0.7rem;
+  border-bottom: 2px solid;
+  outline: 0;
+  color: #8da7c1;
+  text-align: right;
+  position: absolute;
+  right: 0;
+  width: 7rem;
+}
+
+.component-ref::placeholder {
+  /* color: #e5e5e5; */
+  /* opacity: 0.5;
+  transition: opacity .25s; */
+}
+
 .CodeMirror {
   height: auto;
 
-  background: #ececec;
+  background: #fefcf5;
+  border: 1px solid #e5e5e5;
   border-radius: 0.2rem;
+  font-size: .8rem;
+  color: #404040;
+
+  font-family: 'Roboto Mono', monospace;
 }
 
 .CodeMirror-scroll {
@@ -109,12 +266,3 @@ body {
   display: none;
 }
 
-
-.deleteComponent {
-  color: grey;
-  transition: color .1s;
-}
-
-.deleteComponent:hover {
-  color: red;
-}
