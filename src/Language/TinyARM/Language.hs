@@ -175,6 +175,7 @@ prettyPrintInstr i = concat $ ppI i
   where
     ppI :: Instruction SpecialInstructions -> [String]
     ppI (META (HALT str) _ ) = [".HALT \"", str, "\""]
+    ppI (META (COND c) _ ) = [ppC c]
     ppI (IMOV s c r rv) = ["mov", ppS s, ppC c, ppArgs [ppR r, ppRV rv]] 
     ppI (IBINOP s c op r1 r2 rv) = [ppOP op, ppS s, ppC c, ppArgs [ppR r1, ppR r2, ppRV rv]]
     ppI (ICMP c r rv) = ["cmp", ppC c, ppArgs [ppR r, ppRV rv]]

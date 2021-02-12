@@ -8,6 +8,7 @@ module Main where
 
 import Text.Parsec.Error
 
+import Language.While as WHILE
 import Language.TinyARM
 import Language.TinyARM.CFG
 
@@ -96,10 +97,24 @@ requestHandler = method POST $ do
         Nothing -> Left $ errResponse "Invalid JSON object"
         Just req -> 
           case analysisName req of
+            "While-dummy"                 -> requestHandler_WhileDummyAnalysis req
+            "While-taint"                 -> requestHandler_WhileTaintAnalysis req
             "TinyARM-reachingDefinitions" -> requestHandler_TinyARMReachingDefinitions req
             "TinyARM-liveness"            -> requestHandler_TinyARMLiveness req
             _                             -> Left $ errResponse "Invalid analysis name"
 
+
+    requestHandler_WhileDummyAnalysis :: AnalysisRequest -> Either AnalysisErrResponse AnalysisResponse
+    requestHandler_WhileDummyAnalysis req =
+      case WHILE.parseWhile $ programCode req of
+        Left  err  -> Left $ errResponse $ "Parse error: " ++ (show err)
+        Right prog -> Right $ analysisResponse $ WHILE.dummyAnalysis prog (stepCount req)
+
+    requestHandler_WhileTaintAnalysis :: AnalysisRequest -> Either AnalysisErrResponse AnalysisResponse
+    requestHandler_WhileTaintAnalysis req =
+      case WHILE.parseWhile $ programCode req of
+        Left  err  -> Left $ errResponse $ "Parse error: " ++ (show err)
+        Right prog -> Right $ analysisResponse $ WHILE.taintAnalysis prog (stepCount req)
 
     requestHandler_TinyARMReachingDefinitions :: AnalysisRequest -> Either AnalysisErrResponse AnalysisResponse
     requestHandler_TinyARMReachingDefinitions req =

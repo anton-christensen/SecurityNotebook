@@ -43,13 +43,15 @@ data AnalysisResult_ l p a = AnalysisResult_
 
 
 
-analysisToGeneric :: (Show p, Show l, Ord l, Show a) 
+analysisToGeneric :: (Ord l) 
                   => AnalysisResult l p a -- Analysis result
+                  -> (l -> String)    -- Label printer
+                  -> (p -> String)    -- Program Command printer
                   -> (a -> String)    -- State printer
                   -> GenericAnalysisResult l p
-analysisToGeneric result statePrinter =
+analysisToGeneric result printLabel printCode printState =
   GenericAnalysisResult 
-    { gaDotGraph= analysisToDotGraph (aGraph result) (aLabels result) (listHead $ aWorkList result) statePrinter
+    { gaDotGraph= analysisToDotGraph (aGraph result) (aLabels result) (listHead $ aWorkList result) printLabel printCode printState
     , gaSteps= aSteps result, gaWorkList = aWorkList result, gaGraph = aGraph result }
   where
     listHead [] = []
@@ -57,11 +59,11 @@ analysisToGeneric result statePrinter =
 
 
 
-printAnalysisDot :: (Show p, Show l, Ord l, Show a) => CFG l p -> (CFG l p -> (M.Map (CFGKey l) a)) -> (a -> String) -> String
-printAnalysisDot cfg analysis showState = analysisToDotGraph cfg (analysis cfg) [] showState
+printAnalysisDot :: (Ord l) => CFG l p -> (CFG l p -> (M.Map (CFGKey l) a)) -> (l -> String) -> (p -> String) -> (a -> String) -> String
+printAnalysisDot cfg analysis printLabel printCode printState = analysisToDotGraph cfg (analysis cfg) [] printLabel printCode printState
 
-printAnalysisTxt :: (Show p, Show l, Ord l, Show a) => CFG l p -> (CFG l p -> (M.Map (CFGKey l) a)) -> (a -> String) -> String
-printAnalysisTxt cfg analysis showState = analysisToTxt cfg (analysis cfg) showState
+printAnalysisTxt :: (Ord l) => CFG l p -> (CFG l p -> (M.Map (CFGKey l) a)) -> (l -> String) -> (p -> String) -> (a -> String) -> String
+printAnalysisTxt cfg analysis printLabel printCode printState = analysisToTxt cfg (analysis cfg) printLabel printCode printState
 
 
 

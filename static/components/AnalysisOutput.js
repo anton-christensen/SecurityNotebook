@@ -29,6 +29,7 @@ export default {
   watch: {
     text: function(newVal, oldVal) {
       this.req.programCode = newVal;
+      // this.reset(); // ? maybe this
       this.update();
     }
   },
@@ -37,7 +38,7 @@ export default {
 
     req: {
       programCode: ``,
-      analysisName: 'TinyARM-reachingDefinitions',
+      analysisName: 'While-dummy',
       stepCount: 0,
     },
     response: {
@@ -50,6 +51,9 @@ export default {
     analyses: [
       {value: "TinyARM-reachingDefinitions", text: "TinyARM Reaching definitions analysis"},
       {value: "TinyARM-liveness", text: "TinyARM Liveness analysis"},
+      {value: "While-dummy", text: "While CFG display for testing purposes"},
+      {value: "While-taint", text: "While taint analysis"},
+      
     ],
   }),
   methods: {

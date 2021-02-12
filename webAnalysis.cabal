@@ -29,15 +29,19 @@ executable webAnalysis
     Language.LatticeViz.DotGenerator,
     Language.LatticeViz.Parser,
     
+    Language.While,
     Language.While.Language,
     Language.While.Parser,
-    Language.While.Interpreter,
     Language.While.CFG,
+    Language.While.Interpreter,
+    Language.While.Analysis,
+    Language.While.Analysis.Taint,
 
     Language.TinyARM,
-    Language.TinyARM.Parser,
     Language.TinyARM.Language,
+    Language.TinyARM.Parser,
     Language.TinyARM.CFG,
+    Language.TinyARM.Analysis,
     Language.TinyARM.Analysis.Types,
     Language.TinyARM.Analysis.ReachingDefinitions,
     Language.TinyARM.Analysis.Liveness

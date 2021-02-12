@@ -18,6 +18,13 @@ data CFGLabel a
   | LDefault a
   | LEnd
   deriving (Eq)
+showLabel :: (a -> String) -> CFGLabel a -> String
+showLabel _  LStart = "_Start"
+showLabel p (LBranch a) = "IF" ++ p a
+showLabel p (LAssertFalse a) = "F" ++ p a
+showLabel p (LAssertTrue a) = "T" ++ p a
+showLabel p (LDefault a) = p a
+showLabel _  LEnd = "_End"
 
 data CFGNode a
   = NStart
@@ -27,6 +34,13 @@ data CFGNode a
   | NDefault a
   | NEnd
   deriving (Show)
+showNode :: (a -> String) -> CFGNode a -> String 
+showNode _  NStart = "_Start"
+showNode p (NBranch a) = p a
+showNode p (NAssertFalse a) = p a
+showNode p (NAssertTrue a) = p a
+showNode p (NDefault a) = p a
+showNode _  NEnd = "_End"
 
 instance (Ord a) => Ord (CFGLabel a) where
   -- start is least element
@@ -84,21 +98,21 @@ type CFG l p = M.Map (CFGKey l) (CFGValue l p)
 type CFGListElement l p = (CFGKey l, CFGValue l p)
 
 
-analysisToTxt :: forall l p a . (Show p, Show l, Ord l) => (CFG l p) -> M.Map (CFGKey l) a -> (a -> String) -> String
-analysisToTxt cfg stateMap printState = intercalate "\n" $ map showState $ M.toList stateMap
+analysisToTxt :: forall l p a . (Ord l) => (CFG l p) -> M.Map (CFGKey l) a -> (l -> String) -> (p -> String) -> (a -> String) -> String
+analysisToTxt cfg stateMap printLabel printCode printState = intercalate "\n" $ map showState $ M.toList stateMap
   where
     showState :: (CFGKey l, a) -> String
-    showState (key, state) = (showCFGNode key $ type_ $ cfg M.! key) ++ "\n" ++ (indent 2 $ printState state)
+    showState (key, state) = (showCFGNode key (type_ $ cfg M.! key) printLabel printCode) ++ "\n" ++ (indent 2 $ printState state)
   
 
-toDotGraph :: (Show p, Show l, Ord l) => CFG l p -> String
-toDotGraph cfg = _toDotGraph cfg (M.map (\_ -> "") cfg) []
+toDotGraph :: (Ord l) => CFG l p -> (l -> String) -> (p -> String) -> String
+toDotGraph cfg printLabel printCode = _toDotGraph cfg (M.map (\_ -> "") cfg) [] printLabel printCode
 
-analysisToDotGraph :: (Show p, Show l, Ord l) => CFG l p -> M.Map (CFGKey l) a -> [CFGKey l] -> (a -> String) -> String
-analysisToDotGraph cfg analysisResult highlightedStates printState = _toDotGraph cfg (M.map (\x -> escapeQuote $ printState x) analysisResult) highlightedStates
+analysisToDotGraph :: (Ord l) => CFG l p -> M.Map (CFGKey l) a -> [CFGKey l] -> (l -> String) -> (p -> String) ->(a -> String) -> String
+analysisToDotGraph cfg analysisResult highlightedStates printLabel printCode printState = _toDotGraph cfg (M.map (\x -> escapeQuote $ printState x) analysisResult) highlightedStates printLabel printCode
 
-_toDotGraph :: forall l p a . (Show p, Show l, Ord l) => CFG l p -> M.Map (CFGKey l) String -> [CFGKey l] -> String
-_toDotGraph graph analysisResult highlightedStates = graphPrefix ++ graphLabels graph highlightedStates ++ graphEdges graph ++ graphSuffix
+_toDotGraph :: forall l p a . (Ord l) => CFG l p -> M.Map (CFGKey l) String -> [CFGKey l] -> (l -> String) -> (p -> String) -> String
+_toDotGraph graph analysisResult highlightedStates printLabel printCode = graphPrefix ++ graphLabels graph highlightedStates ++ graphEdges graph ++ graphSuffix
   where
     graphPrefix :: String
     graphPrefix = "digraph G {\n  node [shape=box, fontsize=10];\n\n"
@@ -112,37 +126,37 @@ _toDotGraph graph analysisResult highlightedStates = graphPrefix ++ graphLabels 
     showNodeLabel :: [CFGKey l] -> CFGListElement l p -> String
     showNodeLabel highlightedStates (lbl, CFGValue{type_=(NBranch c)}) = 
       if elem lbl highlightedStates then 
-        "  " ++ (show lbl) ++ " [shape=diamond, style=\"rounded, filled\", fillcolor=grey, height=0.8 label=\"" ++ (showCFGNode lbl (NBranch c)) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [shape=diamond, style=\"rounded, filled\", fillcolor=grey, height=0.8 label=\"" ++ (showCFGNode lbl (NBranch c) printLabel printCode) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
       else
-        "  " ++ (show lbl) ++ " [shape=diamond, style=\"rounded\", height=0.8 label=\"" ++ (showCFGNode lbl (NBranch c)) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [shape=diamond, style=\"rounded\", height=0.8 label=\"" ++ (showCFGNode lbl (NBranch c) printLabel printCode) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
     showNodeLabel highlightedStates (lbl, CFGValue{type_=(NAssertTrue c)}) = 
       if elem lbl highlightedStates then 
-        "  " ++ (show lbl) ++ " [fontcolor=\"#008800FF\", color=\"#008800FF\", style=filled, fillcolor=\"#00880040\", label=\"" ++ (showCFGNode lbl (NAssertTrue c)) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [fontcolor=\"#008800FF\", color=\"#008800FF\", style=filled, fillcolor=\"#00880040\", label=\"" ++ (showCFGNode lbl (NAssertTrue c) printLabel printCode) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
       else
-        "  " ++ (show lbl) ++ " [fontcolor=\"#008800FF\", color=\"#008800FF\", label=\"" ++ (showCFGNode lbl (NAssertTrue c)) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [fontcolor=\"#008800FF\", color=\"#008800FF\", label=\"" ++ (showCFGNode lbl (NAssertTrue c) printLabel printCode) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
     showNodeLabel highlightedStates (lbl, CFGValue{type_=(NAssertFalse c)}) = 
       if elem lbl highlightedStates then 
-        "  " ++ (show lbl) ++ " [fontcolor=\"#BB0000FF\", color=\"#BB0000FF\", style=filled, fillcolor=\"#BB000080\", label=\"" ++ (showCFGNode lbl (NAssertFalse c)) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [fontcolor=\"#BB0000FF\", color=\"#BB0000FF\", style=filled, fillcolor=\"#BB000080\", label=\"" ++ (showCFGNode lbl (NAssertFalse c) printLabel printCode) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
       else
-        "  " ++ (show lbl) ++ " [fontcolor=\"#BB0000FF\", color=\"#BB0000FF\", label=\"" ++ (showCFGNode lbl (NAssertFalse c)) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [fontcolor=\"#BB0000FF\", color=\"#BB0000FF\", label=\"" ++ (showCFGNode lbl (NAssertFalse c) printLabel printCode) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
     showNodeLabel highlightedStates (lbl, CFGValue{type_=(NStart)}) = 
       if elem lbl highlightedStates then 
-        "  " ++ (show lbl) ++ " [shape=circle, fillcolor=\"#00000080\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [shape=circle, fillcolor=\"#00000080\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
       else
-        "  " ++ (show lbl) ++ " [shape=circle, fillcolor=\"#000000FF\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [shape=circle, fillcolor=\"#000000FF\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
     showNodeLabel highlightedStates (lbl, CFGValue{type_=(NEnd)}) = 
       if elem lbl highlightedStates then 
-        "  " ++ (show lbl) ++ " [shape=doublecircle, fillcolor=\"#00000080\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [shape=doublecircle, fillcolor=\"#00000080\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
       else
-        "  " ++ (show lbl) ++ " [shape=doublecircle, fillcolor=\"#000000FF\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [shape=doublecircle, fillcolor=\"#000000FF\", style=filled, width=0.2, label=\"\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
     showNodeLabel highlightedStates (lbl, CFGValue{type_=(node)}) = 
       if elem lbl highlightedStates then 
-        "  " ++ (show lbl) ++ " [label=\"" ++ (showCFGNode lbl node) ++ "\", style=filled, fillcolor=grey,  xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [label=\"" ++ (showCFGNode lbl node printLabel printCode) ++ "\", style=filled, fillcolor=grey,  xlabel=\""++(analysisResult M.! lbl)++"\"];"
       else
-        "  " ++ (show lbl) ++ " [label=\"" ++ (showCFGNode lbl node) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
+        "  " ++ (showLabel printLabel lbl) ++ " [label=\"" ++ (showCFGNode lbl node printLabel printCode) ++ "\", xlabel=\""++(analysisResult M.! lbl)++"\"];"
 
     showNodeEdges :: CFGListElement l p -> String
-    showNodeEdges (lbl, CFGValue{successors_=edges}) = concat ["  ", (show lbl), " -> {", (intercalate "," $ map show edges), "};"]
+    showNodeEdges (lbl, CFGValue{successors_=edges}) = concat ["  ", (showLabel printLabel lbl), " -> {", (intercalate "," $ map (showLabel printLabel) edges), "};"]
 
     -- showCFGLabel :: CFGLabel -> String
     -- showCFGLabel (LDefault addr) = "pc" ++ show addr
@@ -155,16 +169,16 @@ _toDotGraph graph analysisResult highlightedStates = graphPrefix ++ graphLabels 
     graphSuffix :: String
     graphSuffix = "}\n"
     
-showCFGNode :: (Show l, Show p) => CFGLabel l -> CFGNode p -> String
-showCFGNode lbl node  = (show lbl) ++ ": " ++ (showCFGNode' node)
+showCFGNode :: forall l p . CFGLabel l -> CFGNode p -> (l -> String) -> (p -> String) -> String
+showCFGNode lbl node pl pp = (showLabel pl lbl) ++ ": " ++ (showCFGNode' node)
   where
-    showCFGNode' :: (Show p) => CFGNode p -> String
+    showCFGNode' :: CFGNode p -> String
     showCFGNode' (NStart) = ""
     showCFGNode' (NEnd) = ""
-    showCFGNode' (NDefault i) = escapeQuote $ show i
-    showCFGNode' (NBranch cond) = "if " ++ (show cond)
-    showCFGNode' (NAssertTrue  cond) = "Assert " ++ (show cond)
-    showCFGNode' (NAssertFalse cond) = "Refute " ++ (show cond)
+    showCFGNode' (NDefault i) = escapeQuote $ pp i
+    showCFGNode' (NBranch cond) = "if " ++ (pp cond)
+    showCFGNode' (NAssertTrue  cond) = "Assert " ++ (pp cond)
+    showCFGNode' (NAssertFalse cond) = "Refute " ++ (pp cond)
 
 
 reverseCFG :: CFG l p -> CFG l p
