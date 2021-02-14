@@ -33,13 +33,13 @@ export default {
       
         <div id="notebookElements">
           <div class="notebook-component"><!-- for faking an extra border for the first child -->
-            <div v-if="elements.length == 0" class="notebook-component-add pointer shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
+            <div  class="notebook-component-add pointer shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
           </div>
 
-          <div class="notebook-component" v-for="(element, index) in elements">
+          <div class="notebook-component" v-for="(element, index) in elements" :key="element.id" >
             <div class="notebook-shoulder-padding leftof"></div>
             <div class="notebook-shoulder-padding rightof"></div>
-            <div class="notebook-component-header visibleOnComponentHover op100">
+            <div class="notebook-component-header">
               <div class="notebook-component-shoulder leftof">
                 <div class="notebook-drag-handle shownOnHover" draggable>
                   <!--<ion-icon name="reorder-two-outline"></ion-icon>-->
@@ -48,7 +48,7 @@ export default {
                   <ion-icon class="hidden-icon" name="eye-off-outline"></ion-icon>
                   <ion-icon class="shown-icon" name="eye-outline"></ion-icon>
                 </div>
-                <div class="notebook-component-add shownOnHover before" v-on:click="openContextMenuAdd($event, index)" data-insertindex="{{index}}"><ion-icon name="add-outline"></ion-icon></i></div>
+                <!--<div class="notebook-component-add shownOnHover before" v-on:click="openContextMenuAdd($event, index)" data-insertindex="{{index}}"><ion-icon name="add-outline"></ion-icon></i></div>-->
                 <div class="notebook-component-add shownOnHover after" v-on:click="openContextMenuAdd($event, index+1)" data-insertindex="{{index+1}}"><ion-icon name="add-outline"></ion-icon></div>
               </div>
               <div class="notebook-component-shoulder rightof">
@@ -80,16 +80,6 @@ export default {
     </div>
   `,
   data: {
-    componentTypes: [
-      {name: "", text: "-- Select new component --"},
-      {name: "text-input", text: "Text Input"},
-      {name: "text-output", text: "Text Output"},
-      {name: "markdown-output", text: "Markdown Output"},
-      {name: "analysis-output", text: "Analysis Output"},
-      {name: "lattice-output", text: "Lattice Output"},
-    ],
-    selected: '',
-
     componentAddMenuItems: [
       {name: "text-input", text: "Text Input"},
       {name: "text-output", text: "Text Output"},
@@ -149,6 +139,7 @@ export default {
         };
       if(this.contextMenuHidden == false) {
         this.contextMenuHidden = true;
+
         this.elements.splice(this.contextMenuInsertIndex, 0, newElement);
       }
       else {
@@ -156,9 +147,10 @@ export default {
       }
     },
     deleteComponent: function(id) {
-      var doc = this.getDocument();
-      doc.elements = doc.elements.filter(elm => elm.id != id);
-      this.setDocument(doc);
+      // var doc = this.getDocument();
+      this.elements = this.elements.filter(elm => elm.id != id);
+      // doc.elements = doc.elements.filter(elm => elm.id != id);
+      // this.setDocument(doc);
     },
 
     getDocument: function() {
