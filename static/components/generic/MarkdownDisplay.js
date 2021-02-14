@@ -21,8 +21,8 @@ export default {
         tex2jax: {
           inlineMath: [ ['$','$'], ["\(","\)"] ],
           displayMath: [ ['$$','$$'], ["\[","\]"] ],
-          processEscapes: true,
-          processEnvironments: true
+          // processEscapes: true,
+          // processEnvironments: true
         },
         messageStyle: "none", // hides loading messages
 

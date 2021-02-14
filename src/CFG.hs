@@ -115,7 +115,7 @@ _toDotGraph :: forall l p a . (Ord l) => CFG l p -> M.Map (CFGKey l) String -> [
 _toDotGraph graph analysisResult highlightedStates printLabel printCode = graphPrefix ++ graphLabels graph highlightedStates ++ graphEdges graph ++ graphSuffix
   where
     graphPrefix :: String
-    graphPrefix = "digraph G {\n  node [shape=box, fontsize=10];\n\n"
+    graphPrefix = "digraph G {\n  node [shape=box];\n\n"
     
     graphLabels :: CFG l p -> [CFGKey l] -> String
     graphLabels cfg highlightedStates = intercalate "\n" (map (showNodeLabel highlightedStates) (M.toList cfg)) ++ "\n\n"

@@ -29,17 +29,19 @@
 
   <!-- mathjax for latex math -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_HTML"></script>
+  <!-- <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script> -->
   
-  
-  
+  <!-- Icon pack -->
+  <!-- <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script> -->
+  <script type="module" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule="" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.js"></script>
+
   <script src="/static/main.js" type="module"></script>
   <!--
     To prevent waterfall-loading, we preload
     all the JS Module files of our application.
   -->
   <link rel="modulepreload" href="/static/components/App.js">
-  <link rel="modulepreload" href="/static/components/Markdown.js">
-  <link rel="modulepreload" href="/static/components/Analysis.js">
   <link rel="modulepreload" href="/static/components/TextInput.js">
   <link rel="modulepreload" href="/static/components/TextOutput.js">
   <link rel="modulepreload" href="/static/components/MarkdownOutput.js">
@@ -55,7 +57,7 @@
 
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vollkorn&family=Open+Sans&family=Roboto+Mono&display=swap" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" /> -->
 </head>
 <body>
   <div id="app">

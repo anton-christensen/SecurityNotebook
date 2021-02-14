@@ -8,7 +8,7 @@ body,html {
   position: relative;
   margin:0;
   padding:0;
-
+  overflow-x: hidden;
 
 
   font-size: 12pt;
@@ -20,6 +20,19 @@ body,html {
 
 #app {
   padding-bottom: 2rem;
+}
+
+ion-icon[name="add-outline"] {
+  width: 17px;
+  height: 17px;
+}
+ion-icon{
+  width: 19px;
+  height: 19px;
+}
+
+.displayNone {
+  display: none;
 }
 
 input, select, button {
@@ -48,6 +61,7 @@ button:active, button:focus  {
   max-width: 960px;
   width: 90%;
   margin: auto;
+  position: relative;
 }
 
 .fl {
@@ -56,6 +70,10 @@ button:active, button:focus  {
 
 .fr {
   float: right;
+}
+
+.pointer {
+  cursor: pointer;
 }
 
 .header {
@@ -74,16 +92,70 @@ button:active, button:focus  {
 }
 
 
+.context-menu {
+  position: absolute;
+  top: 10rem;
+  right: 10rem;
+  z-index: 10;
+  border: 1px solid lightgrey;
+  border-radius: 0.3rem;
+  font-family: 'Open Sans';
+  font-size: 0.8rem;
+  border-top-right-radius: 0;
+}
+.context-menu ul {
+  margin: 0;
+  padding: 0;
+}
+.context-menu li {    
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid lightgrey;
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+}
+.context-menu li:hover {
+    background-color: #f3f3f3;
+}
+
+
 .notebookElements {
   margin-top: 1rem;
 }
 
+.notebook-component:first-child {
+}
 .notebook-component {
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0.5rem;
   padding-bottom: 0.5rem;
   position: relative;
 }
+
+.notebook-component .notebook-component-header {
+  transition: margin .25s, height .25s, opacity .25s;
+  transition-delay: 2s;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.notebook-component:hover .notebook-component-header {
+  height: 1rem;
+  margin: .5rem 0;
+  transition-delay: 0s;
+}
+
+
+.notebook-shoulder-padding {
+  width: 4rem;
+  height: 100%;
+  position: absolute;
+  z-index: 0;
+}
+.notebook-shoulder-padding.leftof { left: -4rem; }
+.notebook-shoulder-padding.rightof { right: -4rem; }
+
 .notebook-component .name {
   color: #e5e5e5;
   font-size: 0.75rem;
@@ -102,7 +174,7 @@ button:active, button:focus  {
   outline: 0;
 }
 .notebook-component .alias::placeholder {
-  opacity: 0;
+  opacity: 0.25;
   transition: opacity .25s;
 }
 
@@ -119,27 +191,52 @@ button:active, button:focus  {
 
 .notebook-component-shoulder {
   position: absolute;
-  top: 0.1rem;
+  top: 0.0rem;
+  height: 100%;
 }
 .notebook-component-shoulder.leftof  { left:  -1.5rem; }
 .notebook-component-shoulder.rightof { right: -1.5rem; }
 
 
-.notebook-component-fold, .notebook-component-remove {
+.notebook-component-fold, .notebook-component-remove, .notebook-drag-handle {
   color: #404040;
-  transition: color .1s, opacity .25s;
-  opacity: 0;
+  transition: color .1s;
   cursor: pointer;
 }
 
-.notebook-component:hover .notebook-component-fold, 
-.notebook-component:hover .notebook-component-remove {
+.notebook-drag-handle {
+  position: absolute;
+  top: 0;
+  right: 2rem;
+  cursor: grabbing;
+}
+
+.notebook-component-add {
+  position: absolute;
+  right: -1px;
+  cursor: pointer;
+}
+.notebook-component-add.before {
+  top: -19px;
+}
+.notebook-component-add.after {
+  bottom: -7px;
+}
+
+.visibleOnComponentHover, .visibleOnComponentHover.shownOnHover {
+  transition: opacity .25s;
+  opacity: 0;
+}
+.shownOnHover {
+  transition: opacity .25s;
   opacity: 0.25;
 }
-.notebook-component-fold:hover, 
-.notebook-component-remove:hover {
-  opacity: 1 !important;
-}
+
+
+
+.notebook-component:hover .visibleOnComponentHover { opacity: 0.25; }
+.notebook-component:hover .visibleOnComponentHover.op100 { opacity: 1; }
+.notebook-component       .shownOnHover:hover { opacity: 1; }
 
 
 .notebook-component-remove:hover {
@@ -148,6 +245,12 @@ button:active, button:focus  {
 
 .notebook-component-content {
   margin-top: .5rem;
+}
+
+.hidden-icon,.shown-icon { width: 1rem;}
+.hidden-icon {
+  position: relative;
+  right: 0px;
 }
 
 /* .component {
@@ -195,19 +298,19 @@ h1:focus {
   padding: .2rem .4rem;
 }
 
-.component-ref:focus {
-  opacity: 1;
+.component-ref:focus, .component-ref:hover {
+  color: #8da7c1ff;
 }
 .component-ref { 
-  opacity: 0.5;
-  transition: 0.2s opacity;   
+  transition: 0.2s color;
   border-left: 0;
   border-right: 0;
   border-top: 0;
   font-size: 0.7rem;
   border-bottom: 2px solid;
   outline: 0;
-  color: #8da7c1;
+  color: #8da7c133;
+
   text-align: right;
   position: absolute;
   right: 0;
