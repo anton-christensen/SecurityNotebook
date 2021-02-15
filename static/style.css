@@ -59,7 +59,8 @@ button:active, button:focus  {
 
 .main-container {
   max-width: 960px;
-  width: 90%;
+  padding-left: 12rem;
+  width: calc(90% - 12rem);
   margin: auto;
   position: relative;
 }

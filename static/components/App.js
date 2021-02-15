@@ -101,12 +101,14 @@ export default {
         this.addComponent(newVal);
         this.selected = "";
       }
+    },
+    title: function(newVal) {
+      document.title = newVal;
     }
   },
   methods: {
     onTitleInput: function(e) {
       this.title = e.target.textContent;
-
     },
 
     openContextMenuAdd: function(e, insertIndex) {
