@@ -207,7 +207,7 @@ button:active, button:focus  {
 .notebook-drag-handle {
   position: absolute;
   top: 0;
-  right: 2rem;
+  right: 1.5rem;
   cursor: grabbing;
 }
 
@@ -289,8 +289,9 @@ h1:focus {
 
 .markdownDisplay pre, .markdownDisplay p code {
   padding: .2rem;
-  background-color: #f7f7f7;
-  color: #404040;
+  background-color: #fefcf5;
+  color: #434f54;
+  border: 1px solid #e5e5e5;
   font-size: .8rem;
   border-radius: .2rem;
 }

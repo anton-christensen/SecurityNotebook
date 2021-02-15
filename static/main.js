@@ -25,4 +25,18 @@ Vue.component('MarkdownDisplay', MarkdownDisplay);
 Vue.component('CodeInput', CodeInput);
 Vue.component('ComponentRef', ComponentRef);
 
+// Vue.use(hljs.vuePlugin);
+
+marked.setOptions({
+    langPrefix: "",
+    highlight: function(code, lang) {
+        if(lang == "plaintext")
+            return code;
+        if(hljs.listLanguages().indexOf(lang) == -1)
+            return hljs.highlightAuto(code).value;
+        return hljs.highlightAuto(code,[lang]).value;
+        
+    }
+})
+
 const app = new Vue(App);
