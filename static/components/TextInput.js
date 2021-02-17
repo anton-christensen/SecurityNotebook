@@ -2,10 +2,11 @@
 export default {
   template: `
   <div class="textInputComponent component">
-    <CodeInput v-bind:text="text" v-on:change="textChange"></CodeInput>
+    <CodeInput v-bind:text="initialText" v-on:change="textChange"></CodeInput>
   </div>
   `,
   data: () => Object({
+    initialText: "",
     text: "",
   }),
   methods: {
@@ -14,8 +15,7 @@ export default {
       return {text: this.text};
     },
     setState: function(s) {
-      var self = this;
-      self.text = s.text;
+      this.initialText = this.text = s.text;
     },
 
     textChange: function(newVal) {
@@ -23,7 +23,6 @@ export default {
     },
   },
   mounted: function() {
-    var self = this;
   },
   
 }
