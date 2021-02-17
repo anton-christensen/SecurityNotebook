@@ -82,7 +82,6 @@ export default {
   data: {
     componentAddMenuItems: [
       {name: "text-input", text: "Text Input"},
-      {name: "text-output", text: "Text Output"},
       {name: "markdown-output", text: "Markdown Output"},
       {name: "analysis-output", text: "Analysis Output"},
       {name: "lattice-output", text: "Lattice Output"},

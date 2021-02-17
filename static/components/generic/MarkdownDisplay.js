@@ -12,30 +12,9 @@ export default {
       }
     },
     updated: function() {
-      MathJax.Hub.Typeset();
     },
     mounted: function() {
       var self = this;
-
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [ ['$','$'], ["\(","\)"] ],
-          displayMath: [ ['$$','$$'], ["\[","\]"] ],
-          // processEscapes: true,
-          // processEnvironments: true
-        },
-        messageStyle: "none", // hides loading messages
-
-        // Center justify equations in code and markdown cells. Elsewhere
-        // we use CSS to left justify single line equations in code cells.
-        displayAlign: 'center',
-        "HTML-CSS": {
-          styles: {'.MathJax_Display': {"margin": 0}},
-          linebreaks: { automatic: true }
-        }
-      });
-      MathJax.Hub.Queue(["Typeset", MathJax.Hub, self.$refs.mdout]);
-      MathJax.Hub.Typeset();
     },
   }
   

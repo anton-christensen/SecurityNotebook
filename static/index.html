@@ -32,9 +32,12 @@
   <!-- markdown compiler -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.0/marked.min.js" integrity="sha512-9xs4M7yksWUBIo+Jhfs65z7U4QTKNuVeN6Desvi2nXREybeQB3RfTBDELEcXD1HaNlnshG87a1SijMShvp4Zcw==" crossorigin="anonymous"></script>
 
-  <!-- mathjax for latex math -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_HTML"></script>
-  
+  <!-- katex for latex math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+
+
+
   <!-- Icon pack -->
   <script type="module" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule="" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.js"></script>
@@ -52,7 +55,6 @@
   -->
   <link rel="modulepreload" href="/static/components/App.js">
   <link rel="modulepreload" href="/static/components/TextInput.js">
-  <link rel="modulepreload" href="/static/components/TextOutput.js">
   <link rel="modulepreload" href="/static/components/MarkdownOutput.js">
   <link rel="modulepreload" href="/static/components/LatticeOutput.js">
   <link rel="modulepreload" href="/static/components/AnalysisOutput.js">

@@ -58,11 +58,15 @@ button:active, button:focus  {
 }
 
 .main-container {
-  max-width: 960px;
+  max-width: 46rem; /* 60rem is roughly 960px. A normal latex page would be something like 35rem */
   padding-left: 12rem;
   width: calc(90% - 12rem);
   margin: auto;
   position: relative;
+}
+
+.katex {
+  font-size: 1rem !important;
 }
 
 .fl {
