@@ -1,6 +1,6 @@
 
 export default {
-  template: `<input class="component-ref visibleOnComponentHover op100" ref="input" placeholder="reference" v-bind:class="{red: !outref}" type="text" v-bind:value="text" v-on:input="bindInput" />`,
+  template: `<input class="component-ref" ref="input" placeholder="reference" v-bind:class="{red: !outref}" type="text" v-bind:value="text" v-on:input="bindInput" />`,
   props: ['refs', 'type'],
   data: () => Object({
     text: null,

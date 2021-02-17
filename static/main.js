@@ -41,8 +41,7 @@ const markdownLatexRenderer = {
     if(lang == "katex") {
       return katex.renderToString(code, {throwOnError: false, output: "html", displayMode: true});
     }
-    else
-      return false;
+    return false;
   },
 
   codespan(code) {
@@ -50,8 +49,9 @@ const markdownLatexRenderer = {
       code = code.substr("§KaTeXInLiNe§".length);
       return katex.renderToString(code, {throwOnError: false, output: "html", displayMode: false});
     }
-    else
+    else {
       return false;
+    }
   },
 }
 const markdownLatexTokenizer = {

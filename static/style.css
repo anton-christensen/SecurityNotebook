@@ -177,6 +177,7 @@ button:active, button:focus  {
   font-size: .8rem;
   color: #8da7c1;
   outline: 0;
+  border-color: #e5e5e5;
 }
 .notebook-component .alias::placeholder {
   opacity: 0.25;
@@ -184,8 +185,8 @@ button:active, button:focus  {
 }
 
 
-.notebook-component:hover .alias {
-  border-color: #e5e5e5;
+.notebook-component .alias:hover {
+  border-color: #c0c0c0;
 }
 .notebook-component:hover .alias::placeholder { opacity: 0.25; }
 
@@ -250,6 +251,7 @@ button:active, button:focus  {
 
 .notebook-component-content {
   margin-top: .5rem;
+  min-height: 2rem;
 }
 
 .hidden-icon,.shown-icon { width: 1rem;}
@@ -292,15 +294,25 @@ h1:focus {
   border-bottom: 2px dotted;
 }
 
-.markdownDisplay pre, .markdownDisplay p code {
+ion-icon {
+  vertical-align: text-top;
+}
+
+a {
+  color: #597fa6;
+}
+
+.markdownDisplay pre > code, .markdownDisplay code {
   padding: .2rem;
   background-color: #fefcf5;
   color: #434f54;
   border: 1px solid #e5e5e5;
   font-size: .8rem;
   border-radius: .2rem;
+  display: inline-block;
+  vertical-align: text-top;
 }
-.markdownDisplay p code {
+.markdownDisplay code {
   padding: .2rem .4rem;
 }
 
