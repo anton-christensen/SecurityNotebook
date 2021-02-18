@@ -301,19 +301,23 @@ ion-icon {
 a {
   color: #597fa6;
 }
+.markdownDisplay pre > code {
+  display: block;
+}
+.markdownDisplay code {
+  display: inline-block;
+  padding: .2rem .4rem;
+}
 
-.markdownDisplay pre > code, .markdownDisplay code {
+.markdownDisplay code,
+.markdownDisplay pre > code {
   padding: .2rem;
   background-color: #fefcf5;
   color: #434f54;
   border: 1px solid #e5e5e5;
   font-size: .8rem;
   border-radius: .2rem;
-  display: inline-block;
   vertical-align: text-top;
-}
-.markdownDisplay code {
-  padding: .2rem .4rem;
 }
 
 .component-ref:focus, .component-ref:hover {
@@ -387,3 +391,27 @@ a {
   display: none;
 }
 
+
+
+@media print{
+  .notebook-component {
+      border: 0;
+      margin: 0;
+      padding: 0;
+  }
+  .notebook-component:first-child {
+      display:none;
+  }
+  .notebook-component-header,.component-ref, .header button {
+      display:none;
+  }
+  .main-container {
+    padding-left: 0;
+    width: 16cm
+  }
+  body { 
+    overflow: auto;
+    height: auto; 
+    overflow: visible;
+  }
+}
