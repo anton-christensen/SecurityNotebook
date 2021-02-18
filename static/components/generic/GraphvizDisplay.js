@@ -1,5 +1,9 @@
 export default {
-  template: `<div ref="graph" class="graph" style="text-align: center;"></div>`,
+  template: `
+  <div class="generic-component-graphviz">
+    <ion-icon v-on:click="resetZoom" class="icon shownOnHover" name="refresh-outline"></ion-icon>
+    <div ref="graph" class="graph" style="text-align: center;"></div>
+  </div>`,
   props: ['dot', 'negpadding', 'scale'],
   data: () => Object({
     graphviz: null

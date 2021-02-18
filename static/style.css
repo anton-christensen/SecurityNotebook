@@ -287,6 +287,16 @@ button:active, button:focus  {
   width: 100%;
   /* height: 100%; */
 }
+.generic-component-graphviz {
+  position: relative;
+}
+.generic-component-graphviz .icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+}
+
 
 
 h1:focus {
