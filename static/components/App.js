@@ -7,6 +7,7 @@ export default {
       <!-- hidden elements to trigger download and file dialog -->
       <a ref="downloadAnchor" style="display:none"></a>
       <input ref="importFile" type="file" style="display:none"></input>
+
       <div class="context-menu add-component" v-bind:class="{displayNone: contextMenuHidden}" ref="componentAddContextMenu">
         <ul>
           <li v-for="type in componentAddMenuItems" v-on:click="addComponent(type.name)">
@@ -30,25 +31,23 @@ export default {
       </div>
 
       <div class="main-container">
-      
         <div id="notebookElements">
           <div class="notebook-component"><!-- for faking an extra border for the first child -->
-            <div  class="notebook-component-add pointer shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
+            <div class="notebook-component-add shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
           </div>
 
-          <div class="notebook-component" v-for="(element, index) in elements" :key="element.id" >
+          <div class="notebook-component" v-on:drop="onDrop" v-on:dragover="onDragOver" v-on:dragleave="onDragLeave" v-for="(element, index) in elements" :key="element.id" v-bind:data-id="element.id">
             <div class="notebook-shoulder-padding leftof"></div>
             <div class="notebook-shoulder-padding rightof"></div>
             <div class="notebook-component-header">
               <div class="notebook-component-shoulder leftof">
-                <div class="notebook-drag-handle shownOnHover" draggable>
-                  <!--<ion-icon name="reorder-two-outline"></ion-icon>-->
+                <div class="notebook-drag-handle shownOnHover" v-bind:data-id="element.id" draggable v-on:dragstart="onDragStart">
+                  <ion-icon name="reorder-two-outline"></ion-icon>
                 </div>
                 <div class="notebook-component-fold shownOnHover hideToggle" v-on:click="element.hidden = !element.hidden" v-bind:class="{hidden: element.hidden, shown: !element.hidden}">
                   <ion-icon class="hidden-icon" name="eye-off-outline"></ion-icon>
                   <ion-icon class="shown-icon" name="eye-outline"></ion-icon>
                 </div>
-                <!--<div class="notebook-component-add shownOnHover before" v-on:click="openContextMenuAdd($event, index)" data-insertindex="{{index}}"><ion-icon name="add-outline"></ion-icon></i></div>-->
                 <div class="notebook-component-add shownOnHover after" v-on:click="openContextMenuAdd($event, index+1)" data-insertindex="{{index+1}}"><ion-icon name="add-outline"></ion-icon></div>
               </div>
               <div class="notebook-component-shoulder rightof">
@@ -106,6 +105,58 @@ export default {
     }
   },
   methods: {
+    onDragStart: function(e) {
+      e.dataTransfer.setData("text/plain", e.target.getAttribute('data-id'));
+    },
+    onDragOver: function(e) {
+      e.preventDefault();
+      let targetComponent = e.target.closest(".notebook-component");
+      let rect = targetComponent.getBoundingClientRect();
+      
+      if(Math.abs(e.y-rect.top) < Math.abs(e.y-rect.bottom)) {
+        targetComponent.classList.remove('paste-below');
+        targetComponent.classList.add('paste-above');
+      }
+      else {
+        targetComponent.classList.remove('paste-above');
+        targetComponent.classList.add('paste-below');
+      }
+    },
+    onDragLeave: function(e) {
+      e.preventDefault();
+      let targetComponent = e.target.closest(".notebook-component");
+      targetComponent.classList.remove('paste-below');
+      targetComponent.classList.remove('paste-above');
+    },
+    onDrop: function(e) {
+      e.preventDefault();
+      let targetComponent = e.target.closest(".notebook-component");
+      let dropTargetID = targetComponent.getAttribute('data-id');
+      let dropSourceID = parseInt(e.dataTransfer.getData("text/plain"));
+      
+      let source = this.getElementByID(dropSourceID);
+      let target = this.getElementByID(dropTargetID);
+      
+      if(targetComponent.classList.contains('paste-above')) {
+        this.elements.splice(target.index, 0, source.element);
+        this.elements.splice(source.index + (target.index < source.index ? 1 : 0), 1);
+      }
+      else if(targetComponent.classList.contains('paste-below')) {
+        this.elements.splice(target.index+1, 0, source.element);
+        this.elements.splice(source.index + (target.index+1 < source.index ? 1 : 0), 1);
+      }
+      targetComponent.classList.remove('paste-above');
+      targetComponent.classList.remove('paste-below');
+    },
+
+    getElementByID: function(id) {
+      let index = this.elements.findIndex( (elm) => elm.id == id );
+      return index == -1 ? null : {
+        index,
+        element: this.elements.find( (elm) => elm.id == id )
+      }
+    },
+
     onTitleInput: function(e) {
       this.title = e.target.textContent;
     },
