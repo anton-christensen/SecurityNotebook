@@ -2,9 +2,10 @@
 export default {
   template: `
   <div class="textInputComponent component">
-    <CodeInput v-bind:text="initialText" v-on:change="textChange"></CodeInput>
+    <CodeInput v-bind:text="initialText" v-on:change="textChange" v-bind:disabled="self.locked"></CodeInput>
   </div>
   `,
+  props: ['self'],
   data: () => Object({
     initialText: "",
     text: "",

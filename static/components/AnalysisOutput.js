@@ -6,7 +6,7 @@ export default {
     <br>
     <button v-on:click="req.stepCount  = 0; update()" v-bind:disabled="req.stepCount <= 0"><<</button>
     <button v-on:click="req.stepCount -= 1; update()" v-bind:disabled="req.stepCount <= 0"><</button>
-    <select v-model="req.analysisName" v-on:change="reset(); update()">
+    <select v-model="req.analysisName" v-on:change="reset(); update()" v-bind:disabled="self.locked">
       <option v-for="analysis in analyses" v-bind:value="analysis.value">
         {{ analysis.text }}
       </option>
@@ -20,7 +20,7 @@ export default {
     <GraphvizDisplay v-bind:dot="response.dot"></GraphvizDisplay>
   </div>
   `,
-  props: ['others'],
+  props: ['others', 'self'],
   computed: {
     text: function() {
       return this.textref ? this.textref.text : "error";

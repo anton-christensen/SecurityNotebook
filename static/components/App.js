@@ -44,9 +44,13 @@ export default {
                 <div class="notebook-drag-handle shownOnHover" v-bind:data-id="element.id" draggable v-on:dragstart="onDragStart">
                   <ion-icon name="reorder-two-outline"></ion-icon>
                 </div>
-                <div class="notebook-component-fold shownOnHover hideToggle" v-on:click="element.hidden = !element.hidden" v-bind:class="{hidden: element.hidden, shown: !element.hidden}">
-                  <ion-icon class="hidden-icon" name="eye-off-outline"></ion-icon>
-                  <ion-icon class="shown-icon" name="eye-outline"></ion-icon>
+                <div class="notebook-lock-component toggle shownOnHover" v-on:click="element.locked = !element.locked" v-bind:class="{enabled: element.locked, disabled: !element.locked}">
+                  <ion-icon class="enabled-icon" name="lock-closed-outline"></ion-icon>
+                  <ion-icon class="disabled-icon"  name="lock-open-outline"></ion-icon>
+                </div>
+                <div class="notebook-component-fold toggle hideToggle shownOnHover" v-on:click="element.hidden = !element.hidden" v-bind:class="{disabled: element.hidden, enabled: !element.hidden}">
+                  <ion-icon class="enabled-icon"  name="eye-outline"></ion-icon>
+                  <ion-icon class="disabled-icon" name="eye-off-outline"></ion-icon>
                 </div>
                 <div class="notebook-component-add shownOnHover after" v-on:click="openContextMenuAdd($event, index+1)" data-insertindex="{{index+1}}"><ion-icon name="add-outline"></ion-icon></div>
               </div>
@@ -57,7 +61,7 @@ export default {
               </div>
               
               <span class="name">#{{element.id}} - </span>
-              <input class="alias" v-model="element.alias" placeholder="Alias" />
+              <input class="alias" v-model="element.alias" placeholder="Alias" v-bind:disabled="element.locked"/>
               <span class="name fr">{{ element.type }}</span>
               
             </div><!-- notebook-component-header -->
@@ -66,8 +70,9 @@ export default {
                 :key="element.id" 
                 :alias="element.alias"
                 :ref="element.id" 
-                :is="element.type"   
+                :is="element.type"
                 v-bind:others="$refs"
+                v-bind:self="element"
               ></component>
             </div><!-- notebook-component-content -->
 
@@ -188,6 +193,7 @@ export default {
           alias: "",
           type: componentName,
           hidden: false,
+          locked: false
         };
       if(this.contextMenuHidden == false) {
         this.contextMenuHidden = true;
@@ -229,10 +235,11 @@ export default {
           id: doc.elements[i].id,
           alias: doc.elements[i].alias,
           type: doc.elements[i].type,
-          hidden: false,
+          locked: doc.elements[i].locked ? true : false,
+          hidden: false
         });
         setTimeout((function() {
-          self.elements[this.i].hidden = this.h;
+          self.elements[this.i].hidden = this.h ? true : false;
         }).bind({i: this.elements.length-1,h: doc.elements[i].hidden}), 10);
       }
       

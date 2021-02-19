@@ -224,7 +224,10 @@ button:active, button:focus  {
 .notebook-component-shoulder.rightof { right: -1.5rem; }
 
 
-.notebook-component-fold, .notebook-component-remove, .notebook-drag-handle {
+.notebook-component-fold, 
+.notebook-component-remove, 
+.notebook-drag-handle, 
+.notebook-lock-component {
   color: #404040;
   transition: color .1s;
   cursor: pointer;
@@ -235,6 +238,13 @@ button:active, button:focus  {
   top: 0;
   right: 1.5rem;
   cursor: grabbing;
+}
+
+.notebook-lock-component {
+  position: absolute;
+  top: 0;
+  right: 3rem;
+  cursor: pointer;
 }
 
 .notebook-component-add {
@@ -387,6 +397,10 @@ a {
   font-family: 'Roboto Mono', monospace;
 }
 
+.CodeMirror.disabled {
+  background-color: #fafaf9;
+}
+
 .CodeMirror-scroll {
   height: auto;
 }
@@ -399,25 +413,25 @@ a {
   display: none;
 }
 
-.hideToggle {cursor: pointer;}
+.toggle {cursor: pointer;}
 
-.hideToggle.shown  .shown-icon,
-.hideToggle.hidden .hidden-icon {
+.toggle.enabled  .enabled-icon,
+.toggle.disabled .disabled-icon {
   display: inline-block;
 }
 
-.hideToggle.hidden .shown-icon,
-.hideToggle.shown  .hidden-icon {
+.toggle.disabled .enabled-icon,
+.toggle.enabled  .disabled-icon {
   display: none;
 }
 
-.hideToggle.shown:hover  .hidden-icon,
-.hideToggle.hidden:hover .shown-icon {
+.toggle.enabled:hover  .disabled-icon,
+.toggle.disabled:hover .enabled-icon {
   display: inline-block;
 }
 
-.hideToggle.hidden:hover .hidden-icon,
-.hideToggle.shown:hover  .shown-icon {
+.toggle.disabled:hover .disabled-icon,
+.toggle.enabled:hover  .enabled-icon {
   display: none;
 }
 
