@@ -91,6 +91,8 @@ export default {
     title: 'Security Analysis Notebook',
 
     elements: [],
+
+    dragginID: -1,
   },
   watch: {
     selected: function(newVal) {
@@ -105,7 +107,7 @@ export default {
   },
   methods: {
     onDragStart: function(e) {
-      e.dataTransfer.setData("text/plain", e.target.getAttribute('data-id'));
+      this.dragginID = e.target.getAttribute('data-id');
     },
     onDragOver: function(e) {
       e.preventDefault();
@@ -131,7 +133,7 @@ export default {
       e.preventDefault();
       let targetComponent = e.target.closest(".notebook-component");
       let dropTargetID = targetComponent.getAttribute('data-id');
-      let dropSourceID = parseInt(e.dataTransfer.getData("text/plain"));
+      let dropSourceID = this.dragginID;
       
       let source = this.getElementByID(dropSourceID);
       let target = this.getElementByID(dropTargetID);
@@ -170,9 +172,8 @@ export default {
         return {x: offset.x + target.offsetLeft, y: offset.y + target.offsetTop};
       }
       let offset = getAbsOffset(e.target);
-
-      this.$refs.componentAddContextMenu.style.right = document.body.clientWidth - (offset.x - 10);
-      this.$refs.componentAddContextMenu.style.top = (offset.y + (e.target.clientHeight/2));
+      this.$refs.componentAddContextMenu.style.right = (document.body.clientWidth - (offset.x - 10)) + "px" ;
+      this.$refs.componentAddContextMenu.style.top = (offset.y + (e.target.clientHeight/2)) + "px";
       this.$refs.componentAddContextMenu.classList.remove('hidden');
       this.contextMenuInsertIndex = insertIndex;
 
@@ -198,10 +199,7 @@ export default {
       }
     },
     deleteComponent: function(id) {
-      // var doc = this.getDocument();
       this.elements = this.elements.filter(elm => elm.id != id);
-      // doc.elements = doc.elements.filter(elm => elm.id != id);
-      // this.setDocument(doc);
     },
 
     getDocument: function() {

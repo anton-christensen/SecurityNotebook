@@ -112,7 +112,8 @@ button:active, button:focus  {
   margin: 0;
   padding: 0;
 }
-.context-menu li {    
+.context-menu li {   
+  background-color: white; 
   padding: 0.4rem 1rem;
   border-bottom: 1px solid lightgrey;
   list-style: none;
@@ -245,7 +246,7 @@ button:active, button:focus  {
   top: -17px;
 }
 .notebook-component-add.after {
-  bottom: -9px;
+  bottom: -14px;
 }
 
 .visibleOnComponentHover, .visibleOnComponentHover.shownOnHover {
