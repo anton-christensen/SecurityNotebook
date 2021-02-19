@@ -65,15 +65,14 @@ export default {
       };
     },
     setState: function(s) {
-      console.log("analysis set state",s);
       this.req = s.req;
       this.$refs.binding.setState(s.binding);
       this.update();
     },
 
-
     textChange: function(newVal) {
     },
+
     reset: function() {
       this.req.stepCount = 0;
       this.maxSteps = Infinity;

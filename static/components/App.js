@@ -52,7 +52,6 @@ export default {
               </div>
               <div class="notebook-component-shoulder rightof">
                 <span class="notebook-component-remove shownOnHover" v-on:click="deleteComponent(element.id)">
-                  <!--<i class="fas fa-trash"></i>-->
                   <ion-icon name="close-outline"></ion-icon>
                 </span>
               </div>

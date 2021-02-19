@@ -13,41 +13,55 @@
   <!-- Vue js app framework -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.js"></script> -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js" integrity="sha512-BKbSR+cfyxLdMAsE0naLReFSLg8/pjbgfxHh/k/kUC82Hy7r6HtR5hLhobaln2gcTvzkyyehrdREdjpsQwy2Jw==" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js" integrity="sha512-BKbSR+cfyxLdMAsE0naLReFSLg8/pjbgfxHh/k/kUC82Hy7r6HtR5hLhobaln2gcTvzkyyehrdREdjpsQwy2Jw==" crossorigin="anonymous"></script> -->
+  <script src="/static/lib/vue/2.6.12/vue.min.js"></script>
 
   <!-- Axios HTTP client lib for AJAX requests -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script> -->
+  <script src="/static/lib/axios/0.21.1/axios.min.js"></script>
 
 
   <!-- graphviz for dot diagrams -->
-  <script src="/static/lib/d3.v5.min.js"></script>
   <!-- <script src="//d3js.org/d3.v5.min.js"></script> -->
-  <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
-  <script src="https://unpkg.com/d3-graphviz@3.1.0/build/d3-graphviz.js"></script>
+  <!-- <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script> -->
+  <!-- <script src="https://unpkg.com/d3-graphviz@3.1.0/build/d3-graphviz.js"></script> -->
+  <script src="/static/lib/d3.v5.min.js"></script>
+  <script src="/static/lib/@hpcc-js/wasm@0.3.11/index.min.js"></script>
+  <script src="/static/lib/d3-graphviz@3.1.0/d3-graphviz.js"></script>
 
   <!-- code text editor -->
-  <script src="https://unpkg.com/codemirror@5.59.2/lib/codemirror.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.59.2/lib/codemirror.css">
+  <!-- <script src="https://unpkg.com/codemirror@5.59.2/lib/codemirror.js"></script> -->
+  <!-- <link rel="stylesheet" href="https://unpkg.com/codemirror@5.59.2/lib/codemirror.css"> -->
+  <script src="/static/lib/codemirror@5.59.2/codemirror.js"></script>
+  <link  href="/static/lib/codemirror@5.59.2/codemirror.css" rel="stylesheet">
   
   <!-- markdown compiler -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.0/marked.min.js" integrity="sha512-9xs4M7yksWUBIo+Jhfs65z7U4QTKNuVeN6Desvi2nXREybeQB3RfTBDELEcXD1HaNlnshG87a1SijMShvp4Zcw==" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.0/marked.min.js" integrity="sha512-9xs4M7yksWUBIo+Jhfs65z7U4QTKNuVeN6Desvi2nXREybeQB3RfTBDELEcXD1HaNlnshG87a1SijMShvp4Zcw==" crossorigin="anonymous"></script> -->
+  <script src="/static/lib/marked/2.0.0/marked.min.js"></script>
 
   <!-- katex for latex math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+  <!-- <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script> -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous"> -->
+  <script defer src="/static/lib/katex@0.12.0/katex.min.js"></script>
+  <link href="/static/lib/katex@0.12.0/katex.min.css" rel="stylesheet">
 
 
 
   <!-- Icon pack -->
-  <script type="module" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule="" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.js"></script>
+  <!-- <script type="module" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.esm.js"></script> -->
+  <!-- <script nomodule="" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.js"></script> -->
+  <script src="/static/lib/ionicons@5.4.0/ionicons.esm.js" type="module"></script>
+  <script src="/static/lib//ionicons@5.4.0/ionicons.js" nomodule=""></script>
 
   <!-- code highlighting -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js" integrity="sha512-zol3kFQ5tnYhL7PzGt0LnllHHVWRGt2bTCIywDiScVvLIlaDOVJ6sPdJTVi0m3rA660RT+yZxkkRzMbb1L8Zkw==" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js" integrity="sha512-zol3kFQ5tnYhL7PzGt0LnllHHVWRGt2bTCIywDiScVvLIlaDOVJ6sPdJTVi0m3rA660RT+yZxkkRzMbb1L8Zkw==" crossorigin="anonymous"></script> -->
+  <script src="/static/lib/highlight.js/10.6.0/highlight.min.js"></script>
   <!-- -- theme -->
   <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/default.min.css" integrity="sha512-kZqGbhf9JTB4bVJ0G8HCkqmaPcRgo88F0dneK30yku5Y/dep7CZfCnNml2Je/sY4lBoqoksXz4PtVXS4GHSUzQ==" crossorigin="anonymous" /> -->
   <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/solarized-light.min.css" integrity="sha512-pJ4snSRt1JFJy6nAJ+zop0G55rCzd1qtW0CvOvB1XGTopUBHSwIZ2qn3g2ztlPfrCaudkpXVcN2BK+ZdxCJ6pQ==" crossorigin="anonymous" /> -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/arduino-light.min.css" integrity="sha512-3mtzkIwUX+M3VLc8fQfzFa7uQNkWcjYnV7bwbuICdXyhSbY5sHhXidXJ3zklA9nWVYully7B1get1iDwKeXvtw==" crossorigin="anonymous" />
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/arduino-light.min.css" integrity="sha512-3mtzkIwUX+M3VLc8fQfzFa7uQNkWcjYnV7bwbuICdXyhSbY5sHhXidXJ3zklA9nWVYully7B1get1iDwKeXvtw==" crossorigin="anonymous" /> -->
+  <link rel="stylesheet" href="/static/lib/highlight.js/10.6.0/arduino-light.min.css"/>
+  
   <script src="/static/main.js" type="module"></script>
   <!--
     To prevent waterfall-loading, we preload
@@ -67,8 +81,8 @@
   <link rel="stylesheet" href="/static/style.css">
 
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vollkorn&family=Open+Sans&family=Roboto+Mono&display=swap" />
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" /> -->
+  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vollkorn&family=Open+Sans&family=Roboto+Mono&display=swap" /> -->
+  <link rel="stylesheet" href="/static/lib/googlefonts/fonts.css" />
 </head>
 <body>
   <div id="app">
