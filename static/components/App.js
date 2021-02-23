@@ -22,7 +22,7 @@ export default {
             <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
           </div>
           <div class="fr" style="margin-top: 0.5rem">
-            <button v-on:click="saveDocument">Save</button>
+            <button v-on:click="saveDocument">Save{{(this.documentChanged ? " *" : "")}}</button>
             <button v-on:click="loadDocument">Load</button>
             <button v-on:click="exportDocument">Export</button>
             <button v-on:click="importDocument">Import</button>
@@ -98,16 +98,15 @@ export default {
     elements: [],
 
     dragginID: -1,
+
+    documentChanged: false
   },
   watch: {
-    selected: function(newVal) {
-      if(newVal) {
-        this.addComponent(newVal);
-        this.selected = "";
-      }
-    },
     title: function(newVal) {
-      document.title = newVal;
+      document.title = (this.documentChanged ? "* " : "") + newVal;
+    },
+    documentChanged: function(newVal) {
+      document.title = (newVal ? "* " : "") + this.title;
     }
   },
   methods: {
@@ -286,6 +285,14 @@ export default {
         self.contextMenuHidden = true;
       }
     });
+
+    let checkChanged = function() {
+      var savedDoc = localStorage.getItem('doc');
+      var currentDoc = JSON.stringify(self.getDocument());
+      self.documentChanged = savedDoc != currentDoc;
+    }
+    setInterval(checkChanged, 3000); // check if document is different from saved document
+    checkChanged();
   },
 };
 
