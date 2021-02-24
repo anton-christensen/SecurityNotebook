@@ -2,19 +2,21 @@
 export default {
   template: `
   <div ref="analysisOutput" class="analysisOutputComponent component">
-    <ComponentRef ref="binding" v-bind:refs="others" type="TextInput" v-on:ref="textref = $event"></ComponentRef>
-    <br>
-    <button v-on:click="req.stepCount  = 0; update()" v-bind:disabled="req.stepCount <= 0"><<</button>
-    <button v-on:click="req.stepCount -= 1; update()" v-bind:disabled="req.stepCount <= 0"><</button>
-    <select v-model="req.analysisName" v-on:change="reset(); update()" v-bind:disabled="self.locked">
-      <option v-for="analysis in analyses" v-bind:value="analysis.value">
-        {{ analysis.text }}
-      </option>
-    </select>
-    <button v-on:click="req.stepCount += 1; update()" v-bind:disabled="req.stepCount >= maxSteps" >></button>
-    <button v-on:click="req.stepCount = -1; update()" v-bind:disabled="req.stepCount >= maxSteps" >>></button>
-    <br>
-    <span>step {{ req.stepCount }}</span>
+    <div class="notebook-component-header">
+      <ComponentRef ref="binding" v-bind:refs="others" type="TextInput" v-on:ref="textref = $event">Input</ComponentRef>
+      <div class="fr">
+        <span class="hideInPrint">step {{ req.stepCount }}</span>
+        <button v-on:click="req.stepCount  = 0; update()" v-bind:disabled="req.stepCount <= 0" class="hideInPrint"><<</button>
+        <button v-on:click="req.stepCount -= 1; update()" v-bind:disabled="req.stepCount <= 0" class="hideInPrint"><</button>
+        <select v-model="req.analysisName" v-on:change="reset(); update()" v-bind:disabled="self.locked" class="hideInPrint">
+          <option v-for="analysis in analyses" v-bind:value="analysis.value">
+            {{ analysis.text }}
+          </option>
+        </select>
+        <button v-on:click="req.stepCount += 1; update()" v-bind:disabled="req.stepCount >= maxSteps" class="hideInPrint">></button>
+        <button v-on:click="req.stepCount = -1; update()" v-bind:disabled="req.stepCount >= maxSteps" class="hideInPrint">>></button>
+      </div><!-- fr -->
+    </div>
     <pre ref="dot" class="dot" v-bind:class="{red: !response.success}">{{response.msg}}</pre>
     
     <GraphvizDisplay v-bind:dot="response.dot"></GraphvizDisplay>

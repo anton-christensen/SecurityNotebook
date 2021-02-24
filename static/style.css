@@ -18,8 +18,14 @@ body,html {
   color: #404040;
 }
 
+.preventScroll {
+  height:100%;
+  overflow: hidden;
+}
+
 #app {
   padding-bottom: 2rem;
+  box-sizing: border-box;
 }
 
 ion-icon[name="add-outline"] {
@@ -38,6 +44,14 @@ ion-icon{
 input, select, button {
   font-family: 'Open Sans';
 }
+
+label {
+  color: #d8d8d8;
+  font-family: 'Open Sans';
+  font-size: 0.8rem;
+}
+
+label::after {content: ': ';}
 
 button {
   border-width: 0;
@@ -187,34 +201,6 @@ button:active, button:focus  {
   font-family: 'Roboto Mono';
 }
 
-.notebook-component .alias {
-  transition: border-color .25s;
-  border: 1px solid transparent;
-  border-right: 0;
-  border-top: 0;
-  border-left: 0;
-  font-family: 'Roboto Mono', monospace;
-  font-size: .8rem;
-  color: #8da7c1;
-  outline: 0;
-  border-color: #e5e5e5;
-}
-.notebook-component .alias::placeholder {
-  opacity: 0.25;
-  transition: opacity .25s;
-}
-
-
-.notebook-component .alias:hover {
-  border-color: #c0c0c0;
-}
-.notebook-component:hover .alias::placeholder { opacity: 0.25; }
-
-.notebook-component .alias:focus {
-  border-color: #c0c0c0;
-}
-.notebook-component .alias:focus::placeholder { opacity: 5; }
-
 .notebook-component-shoulder {
   position: absolute;
   top: 0.0rem;
@@ -360,31 +346,6 @@ a {
   vertical-align: text-top;
 }
 
-.component-ref:focus, .component-ref:hover {
-  color: #8da7c1ff;
-}
-.component-ref { 
-  transition: 0.2s color;
-  border-left: 0;
-  border-right: 0;
-  border-top: 0;
-  font-size: 0.7rem;
-  border-bottom: 2px solid;
-  outline: 0;
-  color: #8da7c133;
-
-  text-align: right;
-  position: absolute;
-  right: 0;
-  width: 7rem;
-}
-
-.component-ref::placeholder {
-  /* color: #e5e5e5; */
-  /* opacity: 0.5;
-  transition: opacity .25s; */
-}
-
 .CodeMirror {
   height: auto;
 
@@ -435,19 +396,42 @@ a {
   display: none;
 }
 
+.minimalistInput {
+  transition: border-color .25s;
+  border: 1px solid transparent;
+  border-right: 0;
+  border-top: 0;
+  border-left: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: .8rem;
+  color: #8da7c1;
+  outline: 0;
+  border-color: #e5e5e5 !important;
+}
+
+.minimalistInput::placeholder {
+  opacity: 0.25;
+  transition: opacity .25s;
+}
+
+.minimalistInput:hover {
+  border-color: #c0c0c0 !important;
+}
+
+.minimalistInput:focus {
+  border-color: #c0c0c0 !important;
+}
+.minimalistInput:focus::placeholder { opacity: 5; }
 
 
 @media print{
+  .hideInPrint {
+    display:none;
+  }
   .notebook-component {
       border: 0;
       margin: 0;
       padding: 0;
-  }
-  .notebook-component:first-child {
-      display:none;
-  }
-  .notebook-component-header,.component-ref, .header button {
-      display:none;
   }
   .main-container {
     padding-left: 0;
@@ -457,5 +441,9 @@ a {
     overflow: auto;
     height: auto; 
     overflow: visible;
+  }
+  .CodeMirror {
+    /* Override locked color */
+    background: #fefcf5 !important; 
   }
 }

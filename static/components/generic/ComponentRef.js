@@ -1,29 +1,25 @@
 
 export default {
-  template: `<input class="component-ref" ref="input" placeholder="reference" v-bind:class="{red: !outref}" type="text" v-bind:value="text" v-on:input="bindInput" />`,
+  template: `
+    <span class="hideInPrint">
+      <label><slot></slot></label>
+      <input class="component-ref minimalistInput" v-bind:class="{ red: !outref }" ref="input" placeholder="reference" type="text" v-model="text" />
+    </span>`,
   props: ['refs', 'type'],
   data: () => Object({
-    text: null,
-    outref: null,
+    text: "",
   }),
-  methods: {
-    getState: function() {
-      return this.text;
-    },
-    setState: function(n) {
-      this.$refs.input.value = n;
-      this.$refs.input.dispatchEvent(new Event('input'));
-    },
-    
-    bindInput: function(e) {
-      var val = e.target.value;
+  computed: {
+    outref: function() {
+      var outref = null;
+      var val = this.text;
       var n = parseInt(val.trim());
       if( n !== NaN &&
         this.refs[val] && 
         this.refs[val][0].getType && 
         this.refs[val][0].getType() == this.type
         ) {
-          this.outref = this.refs[val][0];
+          outref = this.refs[val][0];
       }
       else {
         var ref = Object.values(this.refs).find( (r) => 
@@ -35,11 +31,20 @@ export default {
           r[0].getType && 
           r[0].getType() == this.type
         );
-        this.outref = ref ? ref[0] : null;
+        outref = ref ? ref[0] : null;
       }
-      this.$emit('ref', this.outref);
-      this.text = val;
+      this.$emit('ref', outref);
+      return outref
     }
+  },
+  methods: {
+    getState: function() {
+      return this.text;
+    },
+    setState: function(n) {
+      this.$refs.input.value = n;
+      this.$refs.input.dispatchEvent(new Event('input'));
+    },
   },
 }
   

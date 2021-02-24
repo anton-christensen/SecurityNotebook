@@ -2,7 +2,7 @@
 export default {
     template: `
     <div ref="analysisOutput" class="analysisOutputComponent component">
-      <ComponentRef ref="binding" v-bind:refs="others" type="TextInput" v-on:ref="textref = $event"></ComponentRef>
+      <ComponentRef ref="binding" v-bind:refs="others" type="TextInput" v-on:ref="textref = $event">Input</ComponentRef>
       <br>
       <pre ref="dot" class="dot" v-bind:class="{red: !response.success}">{{response.msg}}</pre>
       

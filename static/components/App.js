@@ -1,5 +1,3 @@
-
-
 export default {
   el: '#app',
   template: `
@@ -21,7 +19,7 @@ export default {
           <div class="fl">
             <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
           </div>
-          <div class="fr" style="margin-top: 0.5rem">
+          <div class="fr hideInPrint" style="margin-top: 0.5rem">
             <button v-on:click="saveDocument">Save{{(this.documentChanged ? " *" : "")}}</button>
             <button v-on:click="loadDocument">Load</button>
             <button v-on:click="exportDocument">Export</button>
@@ -32,14 +30,14 @@ export default {
 
       <div class="main-container">
         <div id="notebookElements">
-          <div class="notebook-component"><!-- for faking an extra border for the first child -->
+          <div class="notebook-component hideInPrint"><!-- for faking an extra border for the first child -->
             <div class="notebook-component-add shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
           </div>
 
           <div class="notebook-component" v-on:drop="onDrop" v-on:dragover="onDragOver" v-on:dragleave="onDragLeave" v-for="(element, index) in elements" :key="element.id" v-bind:data-id="element.id">
             <div class="notebook-shoulder-padding leftof"></div>
             <div class="notebook-shoulder-padding rightof"></div>
-            <div class="notebook-component-header">
+            <div class="notebook-component-header hideInPrint">
               <div class="notebook-component-shoulder leftof">
                 <div class="notebook-drag-handle shownOnHover" v-bind:data-id="element.id" draggable v-on:dragstart="onDragStart">
                   <ion-icon name="reorder-two-outline"></ion-icon>
@@ -61,7 +59,7 @@ export default {
               </div>
               
               <span class="name">#{{element.id}} - </span>
-              <input class="alias" v-model="element.alias" placeholder="Alias" v-bind:disabled="element.locked"/>
+              <input class="alias minimalistInput" v-model="element.alias" placeholder="Alias" v-bind:disabled="element.locked"/>
               <span class="name fr">{{ element.type }}</span>
               
             </div><!-- notebook-component-header -->
@@ -99,7 +97,7 @@ export default {
 
     dragginID: -1,
 
-    documentChanged: false
+    documentChanged: false,
   },
   watch: {
     title: function(newVal) {
@@ -242,11 +240,18 @@ export default {
         }).bind({i: this.elements.length-1,h: doc.elements[i].hidden}), 10);
       }
       
+      // wait till components are created, then set their respective states
       setTimeout(function() {
         for(var i = 0; i < doc.elements.length; i++) {
           self.$refs[doc.elements[i].id][0].setState(doc.elements[i].state);
         }
       }, 1);
+      
+      // Prevent from scrolling to middle of page after load
+      document.getElementById('app').classList.add('preventScroll');
+      setTimeout(function() {
+        document.getElementById('app').classList.remove('preventScroll');
+      }, 0);
     },
     saveDocument: function() {
       localStorage.setItem('doc', JSON.stringify(this.getDocument()));
@@ -294,7 +299,7 @@ export default {
       var currentDoc = JSON.stringify(self.getDocument());
       self.documentChanged = savedDoc != currentDoc;
     }
-    setInterval(checkChanged, 1500);
+    setInterval(checkChanged, 1500); // do so every 1.5seconds
     checkChanged();
 
     // Keyboard shortcut handlers
