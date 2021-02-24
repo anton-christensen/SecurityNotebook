@@ -45,7 +45,7 @@ export default {
                   <ion-icon name="reorder-two-outline"></ion-icon>
                 </div>
                 <div class="notebook-lock-component toggle shownOnHover" v-on:click="element.locked = !element.locked" v-bind:class="{enabled: element.locked, disabled: !element.locked}">
-                  <ion-icon class="enabled-icon" name="lock-closed-outline"></ion-icon>
+                  <ion-icon class="enabled-icon" name="lock-closed-outline" style="color:#B5A642;"></ion-icon>
                   <ion-icon class="disabled-icon"  name="lock-open-outline"></ion-icon>
                 </div>
                 <div class="notebook-component-fold toggle hideToggle shownOnHover" v-on:click="element.hidden = !element.hidden" v-bind:class="{disabled: element.hidden, enabled: !element.hidden}">
@@ -280,19 +280,45 @@ export default {
   },
   mounted: function() {
     var self = this;
+
+    // Hide add component menu if click outside it
     window.addEventListener('click', function(e) {
       if(self.contextMenuHidden == false && !self.$refs.componentAddContextMenu.contains(e.target)) {
         self.contextMenuHidden = true;
       }
     });
 
+    // check if document is different from saved document
     let checkChanged = function() {
       var savedDoc = localStorage.getItem('doc');
       var currentDoc = JSON.stringify(self.getDocument());
       self.documentChanged = savedDoc != currentDoc;
     }
-    setInterval(checkChanged, 3000); // check if document is different from saved document
+    setInterval(checkChanged, 1500);
     checkChanged();
+
+    // Keyboard shortcut handlers
+    document.addEventListener('keydown', function(e) {
+      if (e.key === "s" && (e.ctrlKey)) { // save
+        e.preventDefault(); // prevents "Save Page" from getting triggered.
+        self.saveDocument();
+        checkChanged();
+      }
+      if (e.key === "e" && (e.ctrlKey)) { // export
+        e.preventDefault(); // prevents browser from handling the event
+        self.exportDocument();
+      }
+      if (e.key === "i" && (e.ctrlKey)) { // import
+        e.preventDefault(); // prevents browser from handling the event
+        self.importDocument();
+        checkChanged();
+      }
+      if (e.key === "l" && (e.ctrlKey)) { // load
+        e.preventDefault(); // prevents browser from handling the event
+        self.loadDocument();
+        setTimeout(checkChanged, 100); // give document time to load
+      }
+    });
   },
 };
 
