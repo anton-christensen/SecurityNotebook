@@ -95,4 +95,50 @@ const markdownLatexTokenizer = {
 };
 marked.use({ tokenizer: markdownLatexTokenizer, renderer: markdownLatexRenderer });
 
+
+
+// Handle image paste in codemirror field
+document.onpaste = function(event){
+  // only if active element is a descendant of a codemirror element
+  if(document.activeElement.closest('.CodeMirror') == null)
+    return;
+
+  var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+  for (var index in items) {
+    var item = items[index];
+    if (item.kind === 'file') {
+      var blob = item.getAsFile();
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        var dataURL = event.target.result;
+        if(!dataURL.startsWith('data:image/')) {
+          console.log("pasted non-image file: ", dataURL);
+          return;
+        }
+        var markdownValue = "![altText]("+dataURL+")\n";
+        var inputElm = document.activeElement;
+        // insert at current cursor position
+        //IE support
+        if (document.selection) {
+          inputElm.focus();
+          sel = document.selection.createRange();
+          sel.text = markdownValue;
+        }
+        //MOZILLA and others
+        else if (inputElm.selectionStart || inputElm.selectionStart == '0') {
+          var startPos = inputElm.selectionStart;
+          var endPos = inputElm.selectionEnd;
+          inputElm.value = inputElm.value.substring(0, startPos)
+              + markdownValue
+              + inputElm.value.substring(endPos, inputElm.value.length);
+        } else {
+          inputElm.value += markdownValue;
+        }
+        
+      };
+      reader.readAsDataURL(blob);
+    } 
+  }
+}
+
 const app = new Vue(App);

@@ -1,7 +1,7 @@
 export default {
   template: `
   <div class="generic-component-graphviz">
-    <ion-icon v-on:click="resetZoom" class="icon shownOnHover" name="refresh-outline"></ion-icon>
+    <ion-icon v-on:click="resetZoom" class="icon shownOnHover hideInPrint" name="refresh-outline"></ion-icon>
     <div ref="graph" class="graph" style="text-align: center;"></div>
   </div>`,
   props: ['dot', 'negpadding', 'scale'],
