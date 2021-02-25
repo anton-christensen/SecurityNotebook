@@ -53,6 +53,7 @@ executable webAnalysis
     parsec,
     snap-core,
     snap-server,
+    unordered-containers,
     aeson,
     utf8-string,
     text,

@@ -24,6 +24,7 @@ import Data.Aeson as JSON
 import Control.Monad.IO.Class
 import Data.ByteString.Lazy.UTF8 as BLU
 import Snap.Util.FileServe
+import Data.HashMap.Strict (insert)
 
 data AnalysisRequest = AnalysisRequest
   { programCode :: String
@@ -69,10 +70,12 @@ data APIResponse = APIErrorReponse String
 main :: IO ()
 main = quickHttpServe $ route 
   [ ("/",             serveFile "static/index.html")
-  , ("/static",       serveDirectory "static")
+  , ("/static",       serveDirectoryWith (defaultDirectoryConfig { mimeTypes = mimetypes }) "static")
   , ("/api",          requestHandler)
   , ("/api/lattice",  reqHandlerLattice)
   ]
+  where 
+    mimetypes = insert ".wasm" "application/wasm" defaultMimeTypes
 
 
 reqHandlerLattice :: Snap ()
