@@ -3,7 +3,7 @@ export default {
   template: `
     <div id="app">
       <!-- hidden elements to trigger download and file dialog -->
-      <a ref="downloadAnchor" style="display:none"></a>
+      <a ref="downloadAnchor" style="display:none" download></a>
       <input ref="importFile" type="file" style="display:none"></input>
 
       <div class="context-menu add-component" v-bind:class="{displayNone: contextMenuHidden}" ref="componentAddContextMenu">
@@ -14,71 +14,84 @@ export default {
         </ul>
       </div>
 
-      <div class="header">
-        <div class="main-container">
-          <div class="fl">
-            <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
-          </div>
-          <div class="fr hideInPrint" style="margin-top: 0.5rem">
-            <button v-on:click="saveDocument">Save{{(this.documentChanged ? " *" : "")}}</button>
-            <button v-on:click="loadDocument">Load</button>
-            <button v-on:click="exportDocument">Export</button>
-            <button v-on:click="importDocument">Import</button>
-          </div>
-        </div>
-      </div>
+      <div class="app-panes-wrapper">
+        <!-- to be turned into a menu component -->
+        <FileExplorer ref="fileExplorer" v-on:file-open="openFileFromFileExplorer"></FileExplorer>
 
-      <div class="main-container">
-        <div id="notebookElements">
-          <div class="notebook-component hideInPrint"><!-- for faking an extra border for the first child -->
-            <div class="notebook-component-add shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
-          </div>
-
-          <div class="notebook-component" v-on:drop="onDrop" v-on:dragover="onDragOver" v-on:dragleave="onDragLeave" v-for="(element, index) in elements" :key="element.id" v-bind:data-id="element.id">
-            <div class="notebook-shoulder-padding leftof"></div>
-            <div class="notebook-shoulder-padding rightof"></div>
-            <div class="notebook-component-header hideInPrint">
-              <div class="notebook-component-shoulder leftof">
-                <div class="notebook-drag-handle shownOnHover" v-bind:data-id="element.id" draggable v-on:dragstart="onDragStart">
-                  <ion-icon name="reorder-two-outline"></ion-icon>
-                </div>
-                <div class="notebook-lock-component toggle shownOnHover" v-on:click="element.locked = !element.locked" v-bind:class="{enabled: element.locked, disabled: !element.locked}">
-                  <ion-icon class="enabled-icon" name="lock-closed-outline" style="color:#B5A642;"></ion-icon>
-                  <ion-icon class="disabled-icon"  name="lock-open-outline"></ion-icon>
-                </div>
-                <div class="notebook-component-fold toggle hideToggle shownOnHover" v-on:click="element.hidden = !element.hidden" v-bind:class="{disabled: element.hidden, enabled: !element.hidden}">
-                  <ion-icon class="enabled-icon"  name="eye-outline"></ion-icon>
-                  <ion-icon class="disabled-icon" name="eye-off-outline"></ion-icon>
-                </div>
-                <div class="notebook-component-add shownOnHover after" v-on:click="openContextMenuAdd($event, index+1)" data-insertindex="{{index+1}}"><ion-icon name="add-outline"></ion-icon></div>
+        <!-- main pane -->
+        <div class="app-body">
+          <div class="header">
+            <div class="main-container">
+              <div class="fl">
+                <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
               </div>
-              <div class="notebook-component-shoulder rightof">
-                <span class="notebook-component-remove shownOnHover" v-on:click="deleteComponent(element.id)">
-                  <ion-icon name="close-outline"></ion-icon>
-                </span>
+              <div v-if="filesystemSupported" class="fr hideInPrint" style="margin-top: 0.5rem">
+                <button v-on:click="newDocument">New</button>
+                <button v-on:click="saveDocument" v-bind:disabled="filesystemMode == 'browser'">Save{{(documentChanged ? " *" : "")}}</button>
+                <button v-on:click="saveDocumentAs">Save as</button>
+                <button v-on:click="importDocument">Open</button>
               </div>
-              
-              <span class="name">#{{element.id}} - </span>
-              <input class="alias minimalistInput" v-model="element.alias" placeholder="Alias" v-bind:disabled="element.locked"/>
-              <span class="name fr">{{ element.type }}</span>
-              
-            </div><!-- notebook-component-header -->
-            <div class="notebook-component-content" v-bind:class="{hide: element.hidden}">
-              <component 
-                :key="element.id" 
-                :alias="element.alias"
-                :ref="element.id" 
-                :is="element.type"
-                v-bind:others="$refs"
-                v-bind:self="element"
-              ></component>
-            </div><!-- notebook-component-content -->
+              <div v-else class="fr hideInPrint" style="margin-top: 0.5rem">
+                <button v-on:click="newDocument">New</button>
+                <button v-on:click="importDocument">Open</button>
+                <button v-on:click="exportDocument">Export</button>
+              </div>
+            </div>
+          </div>
 
-          </div><!-- notebook-component -->
-        </div><!-- notebookElements --> 
+          <div class="main-container">
+            <div id="notebookElements">
+              <div class="notebook-component hideInPrint"><!-- for faking an extra border for the first child -->
+                <div class="notebook-component-add shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
+              </div>
 
-      </div>
-    </div>
+              <div class="notebook-component" v-on:drop="onDrop" v-on:dragover="onDragOver" v-on:dragleave="onDragLeave" v-for="(element, index) in elements" :key="element.id" v-bind:data-id="element.id">
+                <div class="notebook-shoulder-padding leftof"></div>
+                <div class="notebook-shoulder-padding rightof"></div>
+                <div class="notebook-component-header hideInPrint">
+                  <div class="notebook-component-shoulder leftof">
+                    <div class="notebook-drag-handle shownOnHover" v-bind:data-id="element.id" draggable v-on:dragstart="onDragStart">
+                      <ion-icon name="reorder-two-outline"></ion-icon>
+                    </div>
+                    <div class="notebook-lock-component toggle shownOnHover" v-on:click="element.locked = !element.locked" v-bind:class="{enabled: element.locked, disabled: !element.locked}">
+                      <ion-icon class="enabled-icon" name="lock-closed-outline" style="color:#B5A642;"></ion-icon>
+                      <ion-icon class="disabled-icon"  name="lock-open-outline"></ion-icon>
+                    </div>
+                    <div class="notebook-component-fold toggle hideToggle shownOnHover" v-on:click="element.hidden = !element.hidden" v-bind:class="{disabled: element.hidden, enabled: !element.hidden}">
+                      <ion-icon class="enabled-icon"  name="eye-outline"></ion-icon>
+                      <ion-icon class="disabled-icon" name="eye-off-outline"></ion-icon>
+                    </div>
+                    <div class="notebook-component-add shownOnHover after" v-on:click="openContextMenuAdd($event, index+1)" v-bind:data-insertindex="index+1"><ion-icon name="add-outline"></ion-icon></div>
+                  </div>
+                  <div class="notebook-component-shoulder rightof">
+                    <span class="notebook-component-remove shownOnHover" v-on:click="deleteComponent(element.id)">
+                      <ion-icon name="close-outline"></ion-icon>
+                    </span>
+                  </div>
+                  
+                  <span class="name">#{{element.id}} - </span>
+                  <input class="alias minimalistInput" v-model="element.alias" placeholder="Alias" v-bind:disabled="element.locked"/>
+                  <span class="name fr">{{ element.type }}</span>
+                  
+                </div><!-- notebook-component-header -->
+                <div class="notebook-component-content" v-bind:class="{hide: element.hidden}">
+                  <component 
+                    :key="element.id" 
+                    :alias="element.alias"
+                    :ref="element.id" 
+                    :is="element.type"
+                    v-bind:others="$refs"
+                    v-bind:self="element"
+                  ></component>
+                </div><!-- notebook-component-content -->
+
+              </div><!-- notebook-component -->
+            </div><!-- notebookElements --> 
+
+          </div><!-- main-container -->
+        </div><!-- app-body -->
+      </div><!-- flex -->
+    </div><!-- app -->
   `,
   data: {
     componentAddMenuItems: [
@@ -98,6 +111,8 @@ export default {
     dragginID: -1,
 
     documentChanged: false,
+    filesystemMode: "browser", // this or "disk" 
+    filesystemSupported: false,
   },
   watch: {
     title: function(newVal) {
@@ -213,9 +228,11 @@ export default {
       };
       
       for(var i = 0; i < doc.elements.length; i++) {
-        var component = this.$refs[doc.elements[i].id][0];
-        if(component.getState) {
-          doc.elements[i].state = component.getState();
+        if(this.$refs[doc.elements[i].id]) {
+          var component = this.$refs[doc.elements[i].id][0];
+          if(component.getState) {
+            doc.elements[i].state = component.getState();
+          }
         }
       }
       return doc;
@@ -253,19 +270,60 @@ export default {
         document.getElementById('app').classList.remove('preventScroll');
       }, 0);
     },
+    newDocument: function() {
+      if(confirm("You have unsaved changes!\nDo you want to continue without saving?")) {
+        localStorage.setItem('doc', "");
+        this.$refs.fileExplorer.deselect();
+        this.contextMenuHidden = true;
+        this.id = 0;
+        this.title = 'Security Analysis Notebook';
+        this.$refs.title.textContent = "Security Analysis Notebook";
+        this.elements = [];
+        this.documentChanged = false;
+        this.filesystemMode = "browser";
+      }
+    },
     saveDocument: function() {
-      localStorage.setItem('doc', JSON.stringify(this.getDocument()));
+      if(this.filesystemMode == "browser") {
+        localStorage.setItem('doc', JSON.stringify(this.getDocument()));
+      }
+      else if(this.filesystemMode == "disk") {
+        var doc = JSON.stringify(this.getDocument());
+        localStorage.setItem('lastfiledoc', doc);
+        this.documentChanged = false;
+        this.$refs.fileExplorer.saveDoc(doc);
+      }
+      else {
+        console.log("unknown filesystem mode!");
+      }
+    },
+    saveDocumentAs: function() {
+      var doc = JSON.stringify(this.getDocument());
+      this.$refs.fileExplorer.saveDocAs(doc);
+    },
+    openFileFromFileExplorer: function(doc) {
+      if(this.elements.length > 0 && this.documentChanged && !confirm("You have unsaved changes!\nDo you want to continue without saving?")) {
+        return;
+      }
+      else {
+        this.setDocument(doc);
+        this.filesystemMode = "disk";
+        localStorage.setItem('lastfiledoc', JSON.stringify(doc));
+        localStorage.setItem('doc', "");
+      }
     },
     loadDocument: function() {
+      this.filesystemMode = "browser";
       var doc = JSON.parse(localStorage.getItem('doc'));
       this.setDocument(doc);
+      this.$refs.fileExplorer.deselect();
     },
     exportDocument: function() {
       var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.getDocument()));
       var dlAnchorElem = this.$refs.downloadAnchor;
       var filename = this.title.trim().replaceAll(' ', '-');
       dlAnchorElem.setAttribute("href",     dataStr     );
-      dlAnchorElem.setAttribute("download", filename+".json");
+      dlAnchorElem.setAttribute("download", filename+".sec.json");
       dlAnchorElem.click();
     },
     importDocument: function() {
@@ -282,9 +340,22 @@ export default {
       }
       importFileElm.click();
     },
+    checkChanged: function() {
+      // check if document is different from saved document
+      if(this.filesystemMode == "browser") {
+        this.saveDocument();
+        this.documentChanged = false;
+      }
+      else {
+        var savedDoc = localStorage.getItem("lastfiledoc");
+        var currentDoc = JSON.stringify(this.getDocument());
+        this.documentChanged = savedDoc != currentDoc && this.elements.length > 0;
+      }
+    }
   },
   mounted: function() {
     var self = this;
+    this.filesystemSupported = this.$refs.fileExplorer.supported;
 
     // Hide add component menu if click outside it
     window.addEventListener('click', function(e) {
@@ -293,37 +364,33 @@ export default {
       }
     });
 
-    // check if document is different from saved document
-    let checkChanged = function() {
-      var savedDoc = localStorage.getItem('doc');
-      var currentDoc = JSON.stringify(self.getDocument());
-      self.documentChanged = savedDoc != currentDoc;
-    }
-    setInterval(checkChanged, 1500); // do so every 1.5seconds
-    checkChanged();
+    if(localStorage.getItem("doc")) this.loadDocument();
+    setInterval(this.checkChanged, 1500); // do so every 1.5seconds
+    this.checkChanged();
 
     // Keyboard shortcut handlers
     document.addEventListener('keydown', function(e) {
-      if (e.key === "s" && (e.ctrlKey)) { // save
-        e.preventDefault(); // prevents "Save Page" from getting triggered.
+      if (e.key === "s" && (e.ctrlKey) && self.filesystemSupported) {
+        e.preventDefault();
         self.saveDocument();
-        checkChanged();
+        self.checkChanged();
       }
-      if (e.key === "e" && (e.ctrlKey)) { // export
-        e.preventDefault(); // prevents browser from handling the event
-        self.exportDocument();
+      if (e.key === "S" && e.shiftKey && e.ctrlKey && self.filesystemSupported) {
+        e.preventDefault();
+        self.saveDocumentAs();
       }
-      if (e.key === "i" && (e.ctrlKey)) { // import
-        e.preventDefault(); // prevents browser from handling the event
+      if (e.key === "o" && e.ctrlKey) {
+        e.preventDefault(); 
         self.importDocument();
-        checkChanged();
       }
-      if (e.key === "l" && (e.ctrlKey)) { // load
-        e.preventDefault(); // prevents browser from handling the event
-        self.loadDocument();
-        setTimeout(checkChanged, 100); // give document time to load
+      if (e.key === "n" && e.ctrlKey) {
+        e.preventDefault(); 
+        self.newDocument();
+      }
+      if (e.key === "e" && e.ctrlKey && !self.filesystemSupported) {
+        e.preventDefault();
+        self.exportDocument();
       }
     });
   },
 };
-

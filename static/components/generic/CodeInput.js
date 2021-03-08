@@ -31,6 +31,7 @@ export default {
       self.editor = CodeMirror.fromTextArea(self.$refs.code, {
         lineNumbers: true,
         viewportMargin: Infinity,
+        // lineWrapping: true,
       });
 
       if(this.disabled) {

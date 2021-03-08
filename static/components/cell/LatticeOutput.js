@@ -17,7 +17,6 @@ export default {
     },
     watch: {
       text: function(newVal, oldVal) {
-        this.text = newVal;
         this.update();
       }
     },

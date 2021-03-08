@@ -1,17 +1,20 @@
 
 import App from './components/App.js';
 
-import TextInput from './components/TextInput.js';
-import AnalysisOutput from './components/AnalysisOutput.js';
-import LatticeOutput from './components/LatticeOutput.js';
-import MarkdownOutput from './components/MarkdownOutput.js';
+import FileExplorer from './components/view/FileExplorer.js';
 
+import TextInput from './components/cell/TextInput.js';
+import AnalysisOutput from './components/cell/AnalysisOutput.js';
+import LatticeOutput from './components/cell/LatticeOutput.js';
+import MarkdownOutput from './components/cell/MarkdownOutput.js';
 
 import GraphvizDisplay from './components/generic/GraphvizDisplay.js';
 import MarkdownDisplay from './components/generic/MarkdownDisplay.js';
 import CodeInput from './components/generic/CodeInput.js';
 import ComponentRef from './components/generic/ComponentRef.js';
 
+
+Vue.component('FileExplorer', FileExplorer);
 
 Vue.component('TextInput', TextInput);
 Vue.component('AnalysisOutput', AnalysisOutput);
