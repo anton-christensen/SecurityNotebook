@@ -523,6 +523,11 @@ a {
   display:none;
 }
 
+ion-icon { 
+  pointer-events: none; /* disable hover text on icons */
+}
+
+
 @media print{
   .hideInPrint, .hideInPrintAndDisplay {
     display:none;

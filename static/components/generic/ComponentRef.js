@@ -4,6 +4,9 @@ export default {
     <span class="hideInPrintAndDisplay">
       <label><slot></slot></label>
       <input class="component-ref minimalistInput" v-bind:class="{ red: !outref }" ref="input" placeholder="reference" type="text" v-model="text" />
+      <a v-if="outref" v-bind:href="'#cell-'+text" class="shownOnHover" v-bind:title="'Jump to '+text">
+        <ion-icon name="link-outline"></ion-icon>
+      </a>
     </span>`,
   props: ['refs', 'type'],
   data: () => Object({

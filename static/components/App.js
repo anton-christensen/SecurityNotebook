@@ -47,7 +47,7 @@ export default {
                 <div class="notebook-component-add shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
               </div>
 
-              <div class="notebook-component" v-on:drop="onDrop" v-on:dragover="onDragOver" v-on:dragleave="onDragLeave" v-for="(element, index) in elements" :key="element.id" v-bind:data-id="element.id">
+              <div v-bind:id="'cell-' + element.alias" class="notebook-component" v-on:drop="onDrop" v-on:dragover="onDragOver" v-on:dragleave="onDragLeave" v-for="(element, index) in elements" :key="element.id" v-bind:data-id="element.id">
                 <div class="notebook-shoulder-padding leftof"></div>
                 <div class="notebook-shoulder-padding rightof"></div>
                 <div class="notebook-component-header hideInPrintAndDisplay">
