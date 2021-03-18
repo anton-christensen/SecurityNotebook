@@ -1,7 +1,7 @@
 
 export default {
   template: `
-    <span class="hideInPrint">
+    <span class="hideInPrintAndDisplay">
       <label><slot></slot></label>
       <input class="component-ref minimalistInput" v-bind:class="{ red: !outref }" ref="input" placeholder="reference" type="text" v-model="text" />
     </span>`,

@@ -1,7 +1,7 @@
 export default {
   el: '#app',
   template: `
-    <div id="app">
+    <div id="app" v-bind:class="{displayMode: !editMode}">
       <!-- hidden elements to trigger download and file dialog -->
       <a ref="downloadAnchor" style="display:none" download></a>
       <input ref="importFile" type="file" style="display:none"></input>
@@ -26,12 +26,14 @@ export default {
                 <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
               </div>
               <div v-if="filesystemSupported" class="fr hideInPrint" style="margin-top: 0.5rem">
+                <button v-on:click="editMode = !editMode">{{editMode ? 'Display Mode' : 'Edit Mode'}}</button>
                 <button v-on:click="newDocument">New</button>
                 <button v-on:click="saveDocument" v-bind:disabled="filesystemMode == 'browser'">Save{{(documentChanged ? " *" : "")}}</button>
                 <button v-on:click="saveDocumentAs">Save as</button>
                 <button v-on:click="importDocument">Open</button>
               </div>
               <div v-else class="fr hideInPrint" style="margin-top: 0.5rem">
+                <button v-on:click="editMode = !editMode">{{editMode ? 'Display Mode' : 'Edit Mode'}}</button>
                 <button v-on:click="newDocument">New</button>
                 <button v-on:click="importDocument">Open</button>
                 <button v-on:click="exportDocument">Export</button>
@@ -41,14 +43,14 @@ export default {
 
           <div class="main-container">
             <div id="notebookElements">
-              <div class="notebook-component hideInPrint"><!-- for faking an extra border for the first child -->
+              <div class="notebook-component hideInPrintAndDisplay"><!-- for faking an extra border for the first child -->
                 <div class="notebook-component-add shownOnHover" v-on:click="openContextMenuAdd($event, 0)" data-insertindex="0" style="right: initial; left: -24px"><ion-icon name="add-outline"></ion-icon></div>
               </div>
 
               <div class="notebook-component" v-on:drop="onDrop" v-on:dragover="onDragOver" v-on:dragleave="onDragLeave" v-for="(element, index) in elements" :key="element.id" v-bind:data-id="element.id">
                 <div class="notebook-shoulder-padding leftof"></div>
                 <div class="notebook-shoulder-padding rightof"></div>
-                <div class="notebook-component-header hideInPrint">
+                <div class="notebook-component-header hideInPrintAndDisplay">
                   <div class="notebook-component-shoulder leftof">
                     <div class="notebook-drag-handle shownOnHover" v-bind:data-id="element.id" draggable v-on:dragstart="onDragStart">
                       <ion-icon name="reorder-two-outline"></ion-icon>
@@ -107,6 +109,7 @@ export default {
     title: 'Security Analysis Notebook',
 
     elements: [],
+    editMode: true,
 
     dragginID: -1,
 
@@ -224,6 +227,7 @@ export default {
       var doc = {
         nextID: this.id,
         title: this.title,
+        editMode: this.editMode,
         elements: JSON.parse(JSON.stringify(this.elements)),
       };
       
@@ -243,6 +247,7 @@ export default {
       
       this.id = doc.nextID;
       this.title = doc.title;
+      this.editMode = doc.editMode == undefined ? true : doc.editMode;
       this.$refs.title.textContent = doc.title;
       for(var i = 0; i < doc.elements.length; i++) {
         this.elements.push ({
@@ -277,6 +282,7 @@ export default {
         this.contextMenuHidden = true;
         this.id = 0;
         this.title = 'Security Analysis Notebook';
+        this.editMode = true;
         this.$refs.title.textContent = "Security Analysis Notebook";
         this.elements = [];
         this.documentChanged = false;

@@ -513,8 +513,18 @@ a {
 .minimalistInput:focus::placeholder { opacity: 5; }
 
 
+.displayMode .notebook-component {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.displayMode .hideInPrintAndDisplay {
+  display:none;
+}
+
 @media print{
-  .hideInPrint {
+  .hideInPrint, .hideInPrintAndDisplay {
     display:none;
   }
   .notebook-component {
@@ -524,7 +534,7 @@ a {
   }
   .main-container {
     padding-left: 0;
-    width: 16cm
+    width: 16cm;
   }
   body { 
     overflow: auto;
