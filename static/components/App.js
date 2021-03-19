@@ -101,6 +101,7 @@ export default {
       {name: "markdown-output", text: "Markdown Output"},
       {name: "analysis-output", text: "Analysis Output"},
       {name: "lattice-output", text: "Lattice Output"},
+      {name: "graphviz-output", text: "Graphviz Output"},
     ],
     contextMenuHidden: true,
     contextMenuInsertIndex: 0,

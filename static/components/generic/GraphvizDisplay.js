@@ -1,7 +1,9 @@
 export default {
   template: `
   <div class="generic-component-graphviz">
-    <ion-icon v-on:click="resetZoom" class="icon shownOnHover hideInPrint" name="refresh-outline"></ion-icon>
+    <div v-on:click="resetZoom" class="icon shownOnHover hideInPrint">
+      <ion-icon  name="refresh-outline"></ion-icon>
+    </div>
     <div ref="graph" class="graph" style="text-align: center;"></div>
   </div>`,
   props: ['dot', 'negpadding', 'scale'],
@@ -42,5 +44,8 @@ export default {
   mounted: function() {
     var self = this;
     this.graphviz = d3.select(this.$refs.graph).graphviz().attributer(this.attributer);
+    this.graphviz.onerror(function(err) {
+      self.$emit('error', err);
+    })
   },
 }

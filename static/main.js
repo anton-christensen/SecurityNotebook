@@ -7,6 +7,7 @@ import TextInput from './components/cell/TextInput.js';
 import AnalysisOutput from './components/cell/AnalysisOutput.js';
 import LatticeOutput from './components/cell/LatticeOutput.js';
 import MarkdownOutput from './components/cell/MarkdownOutput.js';
+import GraphvizOutput from './components/cell/GraphvizOutput.js';
 
 import GraphvizDisplay from './components/generic/GraphvizDisplay.js';
 import MarkdownDisplay from './components/generic/MarkdownDisplay.js';
@@ -16,11 +17,14 @@ import ComponentRef from './components/generic/ComponentRef.js';
 
 Vue.component('FileExplorer', FileExplorer);
 
+// Cell components
 Vue.component('TextInput', TextInput);
 Vue.component('AnalysisOutput', AnalysisOutput);
 Vue.component('LatticeOutput', LatticeOutput);
 Vue.component('MarkdownOutput', MarkdownOutput);
+Vue.component('GraphvizOutput', GraphvizOutput);
 
+// Generic components
 Vue.component('GraphvizDisplay', GraphvizDisplay);
 Vue.component('MarkdownDisplay', MarkdownDisplay);
 Vue.component('CodeInput', CodeInput);
