@@ -102,6 +102,7 @@ export default {
       {name: "analysis-output", text: "Analysis Output"},
       {name: "lattice-output", text: "Lattice Output"},
       {name: "graphviz-output", text: "Graphviz Output"},
+      {name: "interpreter-output", text: "While Interpreter Output"},
     ],
     contextMenuHidden: true,
     contextMenuInsertIndex: 0,

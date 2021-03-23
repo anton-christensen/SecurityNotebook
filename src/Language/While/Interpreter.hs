@@ -147,16 +147,18 @@ memmgr0 =
 data InterpreterState = 
     IState { mem_         :: Memory
            , output_      :: String
+           , input_       :: [Val]
            , adversary_   :: [String]
            , memmgr_      :: MemoryManager
            }
 
-initstate :: InterpreterState
-initstate = IState { mem_         = M.empty
-                   , output_      = ""
-                   , adversary_   = []
-                   , memmgr_      = memmgr0
-                   }
+initstate :: [Int] -> InterpreterState
+initstate input = IState { mem_         = M.empty
+                         , output_      = ""
+                         , input_       = map N input
+                         , adversary_   = []
+                         , memmgr_      = memmgr0
+                         }
 
 -- The interpreter monad
 type Interp = ExceptT String (S.State InterpreterState)
@@ -259,6 +261,16 @@ output str = modify (\s -> s { output_ = (output_ s) ++ str ++ "\n"})
 
 copytoadv :: String -> Interp ()
 copytoadv str = modify (\s -> s { adversary_ = str : (adversary_ s) })
+
+inputpop :: Interp Val
+inputpop = do
+  vs <- gets input_
+  if vs == [] 
+    then throwError $ "[inputpop] Not enough input"
+    else return ()
+  modify (\s -> s {input_ = tail vs})
+  return $ head vs
+
 
 memget :: Var -> Interp Val
 memget x = do
@@ -387,7 +399,8 @@ evalCmd (FREE e1 e2) = do
   free p 0
   return []
 evalCmd (INPUT x y) = do
-  v <- memget ("" ++ y)
+  -- v <- memget ("" ++ y)
+  v <- inputpop
   output $ "INPUT (on channel " ++ y ++ ")"
   memset x v
   return []
@@ -476,7 +489,7 @@ type GInteract a = GState a -> GState a
 
 ginitstate :: GState a
 ginitstate = GState { _g_err    = Nothing
-                    , _g_istate = initstate
+                    , _g_istate = initstate []
                     , _g_cmds   = []
                     , _g_prg    = Right ""
                     }
@@ -601,7 +614,7 @@ handleOPT istate ((OINPUT x v):opts) =
 
 runProgram :: String -> [OPT] -> IO ()
 runProgram fname opts = do
-  res <- runExceptT $ runProgram' fname (handleOPT initstate opts)
+  res <- runExceptT $ runProgram' fname (handleOPT (initstate []) opts)
   either putStrLn return res
 
 runCommand' :: String -> InterpreterState -> IInterface ()
@@ -612,7 +625,7 @@ runCommand' prg istate = do
 
 runCommand :: String -> [OPT] -> IO ()
 runCommand prg opts = do
-  res <- runExceptT $ runCommand' prg (handleOPT initstate opts)
+  res <- runExceptT $ runCommand' prg (handleOPT (initstate []) opts)
   either putStrLn return res
     
 interpreter :: IO ()
@@ -650,8 +663,8 @@ testHeap :: Heap
 testHeap = (M.fromList [(Loc 42,N 87)],M.fromList [(Loc 0,Loc 100)])
 
 testState :: InterpreterState
-testState = initstate { mem_ = testMem
-                      , memmgr_ = (memmgr_ initstate) { heap_ = testHeap }
+testState = (initstate []) { mem_ = testMem
+                      , memmgr_ = (memmgr_ (initstate [])) { heap_ = testHeap }
                       }
 
 testExpr1 :: Expr

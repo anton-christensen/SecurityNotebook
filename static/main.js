@@ -8,6 +8,7 @@ import AnalysisOutput from './components/cell/AnalysisOutput.js';
 import LatticeOutput from './components/cell/LatticeOutput.js';
 import MarkdownOutput from './components/cell/MarkdownOutput.js';
 import GraphvizOutput from './components/cell/GraphvizOutput.js';
+import InterpreterOutput from './components/cell/InterpreterOutput.js';
 
 import GraphvizDisplay from './components/generic/GraphvizDisplay.js';
 import MarkdownDisplay from './components/generic/MarkdownDisplay.js';
@@ -23,6 +24,7 @@ Vue.component('AnalysisOutput', AnalysisOutput);
 Vue.component('LatticeOutput', LatticeOutput);
 Vue.component('MarkdownOutput', MarkdownOutput);
 Vue.component('GraphvizOutput', GraphvizOutput);
+Vue.component('InterpreterOutput', InterpreterOutput);
 
 // Generic components
 Vue.component('GraphvizDisplay', GraphvizDisplay);

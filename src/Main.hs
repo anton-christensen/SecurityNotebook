@@ -26,11 +26,26 @@ import Data.ByteString.Lazy.UTF8 as BLU
 import Snap.Util.FileServe
 import Data.HashMap.Strict (insert)
 
+
+data ExecutionRequest = ExecutionRequest
+  { programCode :: String
+  , inputFile :: String
+  } deriving (Show, Generic, ToJSON, FromJSON)
+
+
+data ExecutionResponse = ExecutionResponse
+  { message :: String
+  , stepsTaken :: Int
+  , success :: Bool
+  } deriving (Show, Generic, ToJSON, FromJSON)
+
+
 data AnalysisRequest = AnalysisRequest
   { programCode :: String
   , analysisName :: String
   , stepCount :: Int
   } deriving (Show, Generic, ToJSON, FromJSON)
+
 
 data AnalysisResponse = AnalysisResponse
   { dot :: String,
@@ -47,12 +62,12 @@ analysisResponse g = AnalysisResponse
       }
 
 
-data AnalysisErrResponse = AnalysisErrResponse
+data ErrResponse = ErrResponse
   { message :: String 
   , success :: Bool
   } deriving (Show, Generic, ToJSON, FromJSON)
-errResponse :: String -> AnalysisErrResponse
-errResponse msg = AnalysisErrResponse { message=msg, success=False }
+errResponse :: String -> ErrResponse
+errResponse msg = ErrResponse { message=msg, success=False }
 
 maxBodyLen = 1000000
 
@@ -71,12 +86,22 @@ main :: IO ()
 main = quickHttpServe $ route 
   [ ("/",             serveFile "static/index.html")
   , ("/static",       serveDirectoryWith (defaultDirectoryConfig { mimeTypes = mimetypes }) "static")
-  , ("/api",          requestHandler)
-  , ("/api/lattice",  reqHandlerLattice)
+  , ("/api",               requestHandler)
+  , ("/api/while/execute", rhWhileExecute)
+  , ("/api/lattice",       reqHandlerLattice)
   ]
   where 
     mimetypes = insert ".wasm" "application/wasm" defaultMimeTypes
 
+rhWhileExecute :: Snap ()
+rhWhileExecute = method POST $ do
+  body <- readRequestBody maxBodyLen
+  res <- liftIO $ case JSON.eitherDecode body :: Either String ExecutionRequest  of
+      Left err -> return $ JSON.encode $ errResponse ("Invalid interpreter request: " ++ err)
+      Right req -> case executeWhile (programCode (req :: ExecutionRequest)) (inputFile req) (-1) of
+        Left err -> return $ JSON.encode $ errResponse err
+        Right (msg, steps) -> return $ JSON.encode $ ExecutionResponse { message = msg, stepsTaken = steps, success = True }
+  writeLBS res
 
 reqHandlerLattice :: Snap ()
 reqHandlerLattice = method POST $ do 
@@ -94,11 +119,11 @@ requestHandler = method POST $ do
       Right res -> writeLBS $ JSON.encode res
   where
 
-    requestHandler' :: ByteString -> Either AnalysisErrResponse AnalysisResponse
+    requestHandler' :: ByteString -> Either ErrResponse AnalysisResponse
     requestHandler' body = 
-      case (JSON.decode body) :: Maybe AnalysisRequest of
-        Nothing -> Left $ errResponse "Invalid JSON object"
-        Just req -> 
+      case (JSON.eitherDecode body) :: Either String AnalysisRequest of
+        Left err -> Left $ errResponse $ "Invalid JSON object: " ++ err
+        Right req -> 
           case analysisName req of
             "While-dummy"                 -> requestHandler_WhileDummyAnalysis req
             "While-taint"                 -> requestHandler_WhileTaintAnalysis req
@@ -107,27 +132,27 @@ requestHandler = method POST $ do
             _                             -> Left $ errResponse "Invalid analysis name"
 
 
-    requestHandler_WhileDummyAnalysis :: AnalysisRequest -> Either AnalysisErrResponse AnalysisResponse
+    requestHandler_WhileDummyAnalysis :: AnalysisRequest -> Either ErrResponse AnalysisResponse
     requestHandler_WhileDummyAnalysis req =
-      case WHILE.parseWhile $ programCode req of
+      case WHILE.parseWhile $ programCode (req :: AnalysisRequest) of
         Left  err  -> Left $ errResponse $ "Parse error: " ++ (show err)
         Right prog -> Right $ analysisResponse $ WHILE.dummyAnalysis prog (stepCount req)
 
-    requestHandler_WhileTaintAnalysis :: AnalysisRequest -> Either AnalysisErrResponse AnalysisResponse
+    requestHandler_WhileTaintAnalysis :: AnalysisRequest -> Either ErrResponse AnalysisResponse
     requestHandler_WhileTaintAnalysis req =
-      case WHILE.parseWhile $ programCode req of
+      case WHILE.parseWhile $ programCode (req :: AnalysisRequest) of
         Left  err  -> Left $ errResponse $ "Parse error: " ++ (show err)
         Right prog -> Right $ analysisResponse $ WHILE.taintAnalysis prog (stepCount req)
 
-    requestHandler_TinyARMReachingDefinitions :: AnalysisRequest -> Either AnalysisErrResponse AnalysisResponse
+    requestHandler_TinyARMReachingDefinitions :: AnalysisRequest -> Either ErrResponse AnalysisResponse
     requestHandler_TinyARMReachingDefinitions req =
-      case parseTinyARM $ programCode req of
+      case parseTinyARM $ programCode (req :: AnalysisRequest) of
         Left  err  -> Left $ errResponse $ "Parse error: " ++ (show err)
         Right prog -> Right $ analysisResponse $ reachingDefinitions prog (stepCount req)
     
-    requestHandler_TinyARMLiveness :: AnalysisRequest -> Either AnalysisErrResponse AnalysisResponse
+    requestHandler_TinyARMLiveness :: AnalysisRequest -> Either ErrResponse AnalysisResponse
     requestHandler_TinyARMLiveness req =
-      case parseTinyARM $ programCode req of
+      case parseTinyARM $ programCode (req :: AnalysisRequest) of
         Left  err  -> Left $ errResponse $ "Parse error: " ++ (show err)
         Right prog -> Right $ analysisResponse $ liveness prog (stepCount req)
 
