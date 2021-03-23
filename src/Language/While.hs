@@ -21,7 +21,7 @@ executeWhile code inputStr stepCount =
         Nothing -> Left "Input contains line that doesn't parse as integer"
         Just input -> case parseProgram code of
             Left error -> Left $ "Parse error: " ++ (show error)
-            Right prog -> case runToEnd prog (initstate input) stepCount of
+            Right prog -> case runToEnd prog (initstate input) (if stepCount >= 1000 || stepCount < 0 then 1000 else stepCount ) of
                 Left error -> Left $ "Exception: " ++ error
                 Right (state, i) -> Right (showIState state, i)
     where
