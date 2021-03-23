@@ -15,8 +15,10 @@ export default {
         </select>
         <button v-on:click="req.stepCount += 1; update()" v-bind:disabled="req.stepCount >= maxSteps" class="hideInPrint">></button>
         <button v-on:click="req.stepCount = -1; update()" v-bind:disabled="req.stepCount >= maxSteps" class="hideInPrint">>></button>
-      </div><!-- fr -->
+      </div>
+      <div style="clear:both"></div>
     </div>
+    
     <pre ref="dot" class="dot" v-bind:class="{red: !response.success}">{{response.msg}}</pre>
     
     <GraphvizDisplay v-bind:dot="response.dot"></GraphvizDisplay>
