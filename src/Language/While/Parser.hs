@@ -62,7 +62,7 @@ program = do
   return cmd
 
 command :: Parser Cmd
-command = block <|> commands
+command = block <|> annocmd
 
 block :: Parser Cmd
 block = braces commands
