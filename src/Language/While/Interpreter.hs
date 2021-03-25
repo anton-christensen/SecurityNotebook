@@ -304,6 +304,8 @@ ptrArith v1 bop v2 = throwError $ concat ["Illegal pointer arithmetic: "
 evalBinOp :: Val -> BinOp -> Val -> Interp Val
 evalBinOp (N i1) Plus  (N i2) = return $ N (i1 + i2)
 evalBinOp (N i1) Minus (N i2) = return $ N (i1 - i2)
+evalBinOp (N i1) Mult (N i2) = return $ N (i1 * i2)
+evalBinOp (N i1) Div (N i2) = return $ N (i1 `div` i2)
 evalBinOp (N i1) Eq    (N i2) = return $ b2n (i1 == i2)
 evalBinOp (N i1) Lt    (N i2) = return $ b2n (i1 < i2)
 evalBinOp (N i1) LE    (N i2) = return $ b2n (i1 <= i2)
