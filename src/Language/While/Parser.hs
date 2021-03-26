@@ -36,6 +36,7 @@ languageDef =
                                      ]
            , Token.reservedOpNames = ["+", "-", "*", "/", "=", "=="
                                      , "<", ">", "&&", "||", "~", "<=", ">="
+                                     , "++"
                                      ]
            }
 
@@ -53,6 +54,7 @@ semi       = Token.semi       lexer -- parses a semicolon
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
 comma = Token.comma lexer
 braces = Token.braces lexer
+strlit = Token.stringLiteral lexer
 
 program :: Parser Cmd
 program = do
@@ -194,6 +196,7 @@ expression = do
                     ]
                   , [ Infix  (reservedOp "+"   >> return (mkfix Plus )) AssocLeft
                     , Infix  (reservedOp "-"   >> return (mkfix Minus)) AssocLeft
+                    , Infix  (reservedOp "++"  >> return (mkfix Conc )) AssocLeft
                     ]
                   ,
                     [ Infix  (reservedOp "=="  >> return (mkfix Eq   )) AssocNone 
@@ -223,6 +226,7 @@ terms =
   <|> castexpr
   <|> liftM VAR identifier
   <|> liftM (LIT . fromInteger) integer
+  <|> liftM STR strlit
 
 --------------------------------------------------
 

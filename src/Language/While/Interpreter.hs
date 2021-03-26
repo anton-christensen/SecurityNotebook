@@ -58,7 +58,7 @@ import System.Console.Haskeline
 -- 
 newtype Loc = Loc Int deriving (Eq,Show,Ord)
 type Pointer = (Loc,Int)
-data Val = N Nat | PTR Pointer deriving (Eq,Show)
+data Val = N Nat | PTR Pointer | S String deriving (Eq,Show)
 
 type Memory = M.Map Var Val
 
@@ -311,8 +311,15 @@ evalBinOp (N i1) Lt    (N i2) = return $ b2n (i1 < i2)
 evalBinOp (N i1) LE    (N i2) = return $ b2n (i1 <= i2)
 evalBinOp (N i1) Gt    (N i2) = return $ b2n (i1 > i2)
 evalBinOp (N i1) GE    (N i2) = return $ b2n (i1 >= i2)
-evalBinOp v1     bop   v2     = ptrArith v1 bop v2
-
+evalBinOp (S s1) Conc  (S s2) = return $ S (s1 ++ s2)
+evalBinOp (PTR p1) bop v2     = ptrArith (PTR p1) bop v2
+evalBinOp v1     bop   v2     = throwError $ concat ["Unsupported arithmetic operation: "
+                                                    , (show v1)
+                                                    , " "
+                                                    , (show bop)
+                                                    , " "
+                                                    , (show v2)
+                                                    ]
 
 isBool :: Val -> Interp Bool
 isBool (N 0) = return False
@@ -327,6 +334,10 @@ isPtr :: Val -> Interp Pointer
 isPtr (PTR p) = return p
 isPtr v       = throwError $ "Bad pointer: " ++ (show v)
 
+isStr :: Val -> Interp String
+isStr (S s) = return s
+isStr v     = throwError $ "Bad string: " ++ (show v)
+
 evalBoolExpr :: Expr -> Interp Bool
 evalBoolExpr e = evalExpr e >>= isBool
 
@@ -335,9 +346,13 @@ evalNatExpr e = evalExpr e >>= isNat
 
 evalPtrExpr :: Expr -> Interp Pointer
 evalPtrExpr e = evalExpr e >>= isPtr
-  
+
+evalStrExpr :: Expr -> Interp String
+evalStrExpr e = evalExpr e >>= isStr
+
 evalExpr :: Expr -> Interp Val
 evalExpr (LIT n) = return $ N n
+evalExpr (STR s) = return $ S s
 evalExpr (VAR x) = memget x
 evalExpr (OP e1 bop e2) = do
   v1 <- evalExpr e1
@@ -734,4 +749,12 @@ ex'p7 :: Cmd
 ex'p7 = SEQ [ ALLOC "p" (LIT 1)
             , IF (OP (DEREF (VAR "p")) Eq (LIT 42)) (LEAK (VAR "h")) Nothing
             ]
+
+ex'p8 = runCommand "username = input(HTTP_user);\
+        \           password = input(HTTP_pass);\
+        \           sql = \"SELECT * FROM users \" ++ \
+        \                   \"WHERE username='\" ++ username ++ \"'\" ++ \
+        \                   \" AND  password='\" ++ password ++ \"'\";\
+        \           output(sql);"
+                  [OINPUT "HTTP_user" (S "' OR 1=1; "),OINPUT "HTTP_pass" (S "foo")]
 

@@ -12,10 +12,11 @@ import Text.Parsec
 type Var = String
 type Nat = Int
 
-data BinOp = Plus | Minus | Mult | Div | Eq | Lt | LE | Gt | GE
+data BinOp = Plus | Minus | Mult | Div | Eq | Lt | LE | Gt | GE | Conc
                deriving (Eq,Show)
 
 data AExpr a = LIT Nat
+             | STR String
              | VAR Var
              | OP Expr BinOp Expr
              | DEREF Expr
