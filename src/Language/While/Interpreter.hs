@@ -375,15 +375,17 @@ evalCmd (SEQ (c:cmds)) = do
 evalCmd (IF e c1 Nothing) = do
   v <- evalBoolExpr e
   if v
-    then return [c1]
+    then evalCmd c1
     else return []
 evalCmd (IF e c1 (Just c2)) = do
   v <- evalBoolExpr e
-  return $ if v then [c1] else [c2]
+  evalCmd $ if v then c1 else c2
 evalCmd (WHILE e c) = do
   v <- evalBoolExpr e
   if v
-    then return $ c : [WHILE e c]
+    then (do cmds <- evalCmd c
+             return $ cmds ++ [WHILE e c]
+         )
     else return []
 evalCmd (LEAK e) = do
   v <- evalExpr e
