@@ -417,9 +417,13 @@ evalCmd (CANNO _ cmd) =
 stepC :: ACmd a -> InterpreterState -> Either String ([ACmd a],InterpreterState)
 stepC c s = case status of
               Left err   -> Left err
-              Right cmds -> Right (cmds,s')
+              Right cmds -> Right (cmds,s'')
   where
     (status,s') = S.runState (runExceptT (evalCmd c)) s
+    upd :: Val -> Val
+    upd (N x) = N (x + 1)
+    upd v = v
+    s'' = s' { mem_ =  M.adjust upd "_INPUT_STEPS" (mem_ s') }
 
 stepsC' :: [ACmd a] -> InterpreterState -> Maybe Int -> Either String ([ACmd a],InterpreterState)
 stepsC' _  s (Just 0) = Right ([],s)
@@ -732,4 +736,7 @@ ex'p7 :: Cmd
 ex'p7 = SEQ [ ALLOC "p" (LIT 1)
             , IF (OP (DEREF (VAR "p")) Eq (LIT 42)) (LEAK (VAR "h")) Nothing
             ]
+
+
+ex'p9 = runCommand "x = input(STEPS); sec = 42; while(sec) {sec = sec - 1;} y = input(STEPS); output(y - x - 3);" [OINPUT "STEPS" (N 0)]
 
