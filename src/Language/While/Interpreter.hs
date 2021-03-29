@@ -153,7 +153,7 @@ data InterpreterState =
            }
 
 initstate :: [Int] -> InterpreterState
-initstate input = IState { mem_         = M.empty
+initstate input = IState { mem_         = M.fromList [("_SYSTEM_STEPS",N 0)]
                          , output_      = ""
                          , input_       = map N input
                          , adversary_   = []
@@ -262,15 +262,14 @@ output str = modify (\s -> s { output_ = (output_ s) ++ str ++ "\n"})
 copytoadv :: String -> Interp ()
 copytoadv str = modify (\s -> s { adversary_ = str : (adversary_ s) })
 
-inputpop :: Interp Val
-inputpop = do
-  vs <- gets input_
-  if vs == [] 
-    then throwError $ "[inputpop] Not enough input"
-    else return ()
-  modify (\s -> s {input_ = tail vs})
-  return $ head vs
-
+inputpop :: Var -> Interp Val
+inputpop v = 
+  case v of
+    "STEPS" -> memget "_SYSTEM_STEPS"
+    _       -> do vs <- gets input_
+                  when (vs == []) $ throwError "[inputpop] Not enough input"
+                  modify (\s -> s {input_ = tail vs})
+                  return $ head vs
 
 memget :: Var -> Interp Val
 memget x = do
@@ -400,7 +399,7 @@ evalCmd (FREE e1 e2) = do
   return []
 evalCmd (INPUT x y) = do
   -- v <- memget ("" ++ y)
-  v <- inputpop
+  v <- inputpop y
   output $ "INPUT (on channel " ++ y ++ ")"
   memset x v
   return []
@@ -423,7 +422,7 @@ stepC c s = case status of
     upd :: Val -> Val
     upd (N x) = N (x + 1)
     upd v = v
-    s'' = s' { mem_ =  M.adjust upd "_INPUT_STEPS" (mem_ s') }
+    s'' = s' { mem_ =  M.adjust upd "_SYSTEM_STEPS" (mem_ s') }
 
 stepsC' :: [ACmd a] -> InterpreterState -> Maybe Int -> Either String ([ACmd a],InterpreterState)
 stepsC' _  s (Just 0) = Right ([],s)
