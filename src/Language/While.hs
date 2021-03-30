@@ -17,32 +17,13 @@ parseWhile = parseProgram
 
 executeWhile :: String -> String -> Int -> Either String (String, Int)
 executeWhile code inputStr stepCount =
-    case inputAsList of
-        Nothing -> Left "Input contains line that doesn't parse as integer"
-        Just input -> case parseProgram code of
-            Left error -> Left $ "Parse error: " ++ (show error)
-            Right prog -> case runToEnd prog (initstate input) (if stepCount >= 1000 || stepCount < 0 then 1000 else stepCount ) of
-                Left error -> Left $ "Exception: " ++ error
-                Right (state, i) -> Right (showIState state, i)
-    where
-        inputAsList :: Maybe [Int]
-        inputAsList = let 
-            maybeList = map readMaybe $ lines inputStr
-            properList = catMaybes maybeList
-            in
-                if length maybeList == length properList then Just properList else Nothing
-
-
-        runToEnd :: ACmd a -> InterpreterState -> Int -> Either String (InterpreterState, Int)
-        runToEnd prog initialState maxSteps = fmap (\(_, s, n) -> (s,n) ) $ runToEnd' [prog] initialState 0 $ if maxSteps >= 0 then Just maxSteps else Nothing
-
-
-        runToEnd' :: [ACmd a] -> InterpreterState -> Int -> Maybe Int -> Either String ([ACmd a],InterpreterState, Int)
-        runToEnd' _  s n (Just 0) = Right ([],s,n)
-        runToEnd' [] s n _        = Right ([],s,n)
-        runToEnd' (c:cmds) s n cnt = do
-            (cmds',s') <- stepC c s
-            runToEnd' (cmds' ++ cmds) s' (n+1) (fmap (\m -> m-1) cnt)
+  case parseProgram code of
+    Left error -> Left $ "Parse error: " ++ (show error)
+    Right prog -> do let steps = if stepCount >= 1000 || stepCount < 0 then 1000 else stepCount
+                     let res = stepsCmd prog (initstate $ lines inputStr) steps
+                     case res of
+                       Left error  -> Left $ "Exception: " ++ error
+                       Right state -> Right (showIState state, stepcounter_ state)
 
 
 

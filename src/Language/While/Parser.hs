@@ -56,8 +56,8 @@ comma = Token.comma lexer
 braces = Token.braces lexer
 strlit = Token.stringLiteral lexer
 
-parseLiteral :: Parser Expr
-parseLiteral = liftM (LIT . fromInteger) integer
+parseLiteral :: Parser Literal
+parseLiteral = liftM (NAT . fromInteger) integer
                  <|> liftM STR strlit
 
 program :: Parser Cmd
@@ -158,7 +158,7 @@ inputCmd = do
 exprPair :: Parser (Expr,Expr)
 exprPair = parens $ do
   expr1 <- expression
-  expr2 <- option (LIT 0) $
+  expr2 <- option (LIT (NAT 0)) $
            do comma
               expression
   return (expr1,expr2)
@@ -229,7 +229,7 @@ terms =
   <|> derefexpr
   <|> castexpr
   <|> liftM VAR identifier
-  <|> parseLiteral
+  <|> liftM LIT parseLiteral
   -- <|> liftM (LIT . fromInteger) integer
   -- <|> liftM STR strlit
 
@@ -240,3 +240,9 @@ parseProgramFile fname = parseFromFile program fname
 
 parseProgram :: String -> Either ParseError Cmd
 parseProgram prg = parse program "<input string>" prg
+
+parseInput :: String -> Either ParseError Literal
+parseInput inp = parse parseLiteral "<input>" inp
+
+-- parseInputs :: [String] -> Either ParseError [Val]
+-- parseInputs inp = parse parseliteral "<input>" inp

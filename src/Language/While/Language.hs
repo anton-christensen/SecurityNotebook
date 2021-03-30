@@ -15,8 +15,9 @@ type Nat = Int
 data BinOp = Plus | Minus | Mult | Div | Eq | Lt | LE | Gt | GE | Conc
                deriving (Eq,Show)
 
-data AExpr a = LIT Nat
-             | STR String
+data Literal = NAT Nat | STR String deriving (Eq,Show)
+
+data AExpr a = LIT Literal
              | VAR Var
              | OP Expr BinOp Expr
              | DEREF Expr
@@ -80,8 +81,12 @@ prettyPrintInstr cmd = concat $ ppCmd cmd
     ppV :: Var -> String
     ppV v = v
 
+    ppLit :: Literal -> String
+    ppLit (NAT n) = show n
+    ppLit (STR s) = show s
+
     ppE :: Expr -> String
-    ppE (LIT n) = show n
+    ppE (LIT l) = ppLit l
     ppE (VAR v) = ppV v
     ppE (OP e1 op e2) = concat [ppE e1, ppOP op, ppE e2]
     ppE (DEREF e) = "*(" ++ (ppE e) ++ ")"
@@ -98,3 +103,4 @@ prettyPrintInstr cmd = concat $ ppCmd cmd
     ppOP LE = " <= "
     ppOP Gt = " > "
     ppOP GE = " >= "
+    ppOP Conc = " ++ "

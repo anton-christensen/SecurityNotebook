@@ -13,7 +13,7 @@ import Control.Monad.Except
 
 import Language.While.Language
 import Text.Parsec.Pos
-import qualified Language.While.Parser as Parser (parseProgramFile,parseProgram)
+import qualified Language.While.Parser as Parser (parseProgramFile,parseProgram,parseInput)
 
 import System.Console.Haskeline
 
@@ -147,15 +147,17 @@ memmgr0 =
 data InterpreterState = 
     IState { mem_         :: Memory
            , output_      :: String
-           , input_       :: [Val]
+           , input_       :: [String]
+           , stepcounter_ :: Int
            , adversary_   :: [String]
            , memmgr_      :: MemoryManager
            }
 
-initstate :: [Int] -> InterpreterState
-initstate input = IState { mem_         = M.fromList [("_SYSTEM_STEPS",N 0)]
+initstate :: [String] -> InterpreterState
+initstate input = IState { mem_         = M.empty
                          , output_      = ""
-                         , input_       = map N input
+                         , input_       = input
+                         , stepcounter_ = 0
                          , adversary_   = []
                          , memmgr_      = memmgr0
                          }
@@ -265,11 +267,14 @@ copytoadv str = modify (\s -> s { adversary_ = str : (adversary_ s) })
 inputpop :: Var -> Interp Val
 inputpop v = 
   case v of
-    "STEPS" -> memget "_SYSTEM_STEPS"
-    _       -> do vs <- gets input_
-                  when (vs == []) $ throwError "[inputpop] Not enough input"
-                  modify (\s -> s {input_ = tail vs})
-                  return $ head vs
+    "SYSTEM_STEPS" -> do steps <- gets stepcounter_
+                         return $ N steps
+    _              -> do vs <- gets input_
+                         when (vs == []) $ throwError "[inputpop] Not enough input"
+                         modify (\s -> s {input_ = tail vs})
+                         case Parser.parseInput (head vs) of
+                           Left err -> throwError $ "[inputpop] Parse error: " ++ (show err)
+                           Right lit -> return $ evalLit lit
 
 memget :: Var -> Interp Val
 memget x = do
@@ -311,8 +316,8 @@ evalBinOp (N i1) LE    (N i2) = return $ b2n (i1 <= i2)
 evalBinOp (N i1) Gt    (N i2) = return $ b2n (i1 > i2)
 evalBinOp (N i1) GE    (N i2) = return $ b2n (i1 >= i2)
 evalBinOp (S s1) Conc  (S s2) = return $ S (s1 ++ s2)
-evalBinOp (S s1) Plus  (N i2) = return $ S (s1 ++ (show i2))
-evalBinOp (N i1) Plus  (S s2) = return $ S ((show i1) ++ s2)
+evalBinOp (S s1) Conc  (N i2) = return $ S (s1 ++ (show i2))
+evalBinOp (N i1) Conc  (S s2) = return $ S ((show i1) ++ s2)
 evalBinOp (PTR p1) bop v2     = ptrArith (PTR p1) bop v2
 evalBinOp v1     bop   v2     = throwError $ concat ["Unsupported arithmetic operation: "
                                                     , (show v1)
@@ -352,9 +357,12 @@ evalPtrExpr e = evalExpr e >>= isPtr
 evalStrExpr :: Expr -> Interp String
 evalStrExpr e = evalExpr e >>= isStr
 
+evalLit :: Literal -> Val
+evalLit (NAT n) = N n
+evalLit (STR s) = S s
+
 evalExpr :: Expr -> Interp Val
-evalExpr (LIT n) = return $ N n
-evalExpr (STR s) = return $ S s
+evalExpr (LIT l) = return $ evalLit l
 evalExpr (VAR x) = memget x
 evalExpr (OP e1 bop e2) = do
   v1 <- evalExpr e1
@@ -442,7 +450,7 @@ stepC c s = case status of
     upd :: Val -> Val
     upd (N x) = N (x + 1)
     upd v = v
-    s'' = s' { mem_ =  M.adjust upd "_SYSTEM_STEPS" (mem_ s') }
+    s'' = s' { stepcounter_ = (stepcounter_ s') + 1 }
 
 stepsC' :: [ACmd a] -> InterpreterState -> Maybe Int -> Either String ([ACmd a],InterpreterState)
 stepsC' _  s (Just 0) = Right ([],s)
@@ -454,6 +462,8 @@ stepsC' (c:cmds) s n = do
 stepsC :: ACmd a -> InterpreterState -> Either String InterpreterState
 stepsC c s = fmap snd $ stepsC' [c] s Nothing
 
+stepsCmd :: ACmd a -> InterpreterState -> Int -> Either String InterpreterState
+stepsCmd cmd initstate maxstep = fmap snd $ stepsC' [cmd] initstate (Just maxstep)
 
 ----------------------------------------------------------------------
 -- Interpreter / Interface
@@ -679,62 +689,62 @@ interpreter = runInputT defaultSettings loop
 -- Examples and Test Programs
 ----------------------------------------------------------------------
 
-testMem :: Memory
-testMem = M.fromList [("x",PTR (Loc 41,1))]
+-- testMem :: Memory
+-- testMem = M.fromList [("x",PTR (Loc 41,1))]
 
-testHeap :: Heap
-testHeap = (M.fromList [(Loc 42,N 87)],M.fromList [(Loc 0,Loc 100)])
+-- testHeap :: Heap
+-- testHeap = (M.fromList [(Loc 42,N 87)],M.fromList [(Loc 0,Loc 100)])
 
-testState :: InterpreterState
-testState = (initstate []) { mem_ = testMem
-                      , memmgr_ = (memmgr_ (initstate [])) { heap_ = testHeap }
-                      }
+-- testState :: InterpreterState
+-- testState = (initstate []) { mem_ = testMem
+--                       , memmgr_ = (memmgr_ (initstate [])) { heap_ = testHeap }
+--                       }
 
-testExpr1 :: Expr
-testExpr1 = VAR "x"
+-- testExpr1 :: Expr
+-- testExpr1 = VAR "x"
 
-testExpr2 :: Expr
-testExpr2 = CAST (VAR "x")
+-- testExpr2 :: Expr
+-- testExpr2 = CAST (VAR "x")
 
-testExpr3 :: Expr
-testExpr3 = CAST (VAR "y")
+-- testExpr3 :: Expr
+-- testExpr3 = CAST (VAR "y")
 
-testExpr4 :: Expr
-testExpr4 = DEREF (VAR "x")
+-- testExpr4 :: Expr
+-- testExpr4 = DEREF (VAR "x")
 
-runExprTests = do
-  mapM_ (\e -> print $ stepE e testState) [testExpr1,testExpr2,testExpr3,testExpr4] 
+-- runExprTests = do
+--   mapM_ (\e -> print $ stepE e testState) [testExpr1,testExpr2,testExpr3,testExpr4] 
 
-ex'p1 :: Cmd
-ex'p1 = SEQ [ ALLOC "p" (LIT 1)
-            , IF (VAR "h") (ALLOC "q" (LIT 1)) Nothing
-            , ALLOC "p'" (LIT 1)
-            , LEAK (OP (CAST (VAR "p'")) Minus (CAST (VAR "p")))
-            ]
+-- ex'p1 :: Cmd
+-- ex'p1 = SEQ [ ALLOC "p" (LIT 1)
+--             , IF (VAR "h") (ALLOC "q" (LIT 1)) Nothing
+--             , ALLOC "p'" (LIT 1)
+--             , LEAK (OP (CAST (VAR "p'")) Minus (CAST (VAR "p")))
+--             ]
 
-ex'p2 :: Cmd
-ex'p2 = SEQ [ ALLOC "p" (LIT 1)
-            , LEAK (VAR "p")
-            ]
+-- ex'p2 :: Cmd
+-- ex'p2 = SEQ [ ALLOC "p" (LIT 1)
+--             , LEAK (VAR "p")
+--             ]
 
-ex'p3 :: Cmd
-ex'p3 = SEQ [ ALLOC "q" (LIT 3)
-            , FREE (VAR "q") (LIT 0)
-            , IF (VAR "h") (ALLOC "p" (LIT 1000)) (Just (ALLOC "p" (LIT 1)))
-            , IF (OP (VAR "p") Eq (VAR "q")) (ASGN "x" (LIT 0)) (Just (ASGN "x" (LIT 1)))
-            , LEAK (VAR "x")
-            ]
+-- ex'p3 :: Cmd
+-- ex'p3 = SEQ [ ALLOC "q" (LIT 3)
+--             , FREE (VAR "q") (LIT 0)
+--             , IF (VAR "h") (ALLOC "p" (LIT 1000)) (Just (ALLOC "p" (LIT 1)))
+--             , IF (OP (VAR "p") Eq (VAR "q")) (ASGN "x" (LIT 0)) (Just (ASGN "x" (LIT 1)))
+--             , LEAK (VAR "x")
+--             ]
 
-ex'p4 :: Cmd
-ex'p4 = SEQ [ ALLOC "k" (LIT 2)
-            , PTRASGN (OP (VAR "k") Plus (LIT 0)) (LIT 41)
-            , PTRASGN (OP (VAR "k") Plus (LIT 1)) (LIT 42)
-            , FREE (VAR "k") (LIT 0)
-            , ALLOC "u" (LIT 3)
-            , PTRASGN (OP (VAR "u") Plus (LIT 0)) (LIT 1)
-            , PTRASGN (OP (VAR "u") Plus (LIT 2)) (LIT 3)
-            , LEAK (DEREF (OP (VAR "u") Plus (LIT 1)))
-            ]
+-- ex'p4 :: Cmd
+-- ex'p4 = SEQ [ ALLOC "k" (LIT 2)
+--             , PTRASGN (OP (VAR "k") Plus (LIT 0)) (LIT 41)
+--             , PTRASGN (OP (VAR "k") Plus (LIT 1)) (LIT 42)
+--             , FREE (VAR "k") (LIT 0)
+--             , ALLOC "u" (LIT 3)
+--             , PTRASGN (OP (VAR "u") Plus (LIT 0)) (LIT 1)
+--             , PTRASGN (OP (VAR "u") Plus (LIT 2)) (LIT 3)
+--             , LEAK (DEREF (OP (VAR "u") Plus (LIT 1)))
+--             ]
 
 -- #+NAME: p5
 -- #+BEGIN_SRC
@@ -751,10 +761,10 @@ ex'p4 = SEQ [ ALLOC "k" (LIT 2)
 --   copy_to_adv(*p);  /* only deref'ed value of p is leaked */
 -- #+END_SRC
 
-ex'p7 :: Cmd
-ex'p7 = SEQ [ ALLOC "p" (LIT 1)
-            , IF (OP (DEREF (VAR "p")) Eq (LIT 42)) (LEAK (VAR "h")) Nothing
-            ]
+-- ex'p7 :: Cmd
+-- ex'p7 = SEQ [ ALLOC "p" (LIT 1)
+--             , IF (OP (DEREF (VAR "p")) Eq (LIT 42)) (LEAK (VAR "h")) Nothing
+--             ]
 
 ex'p8 = runCommand "username = input(HTTP_user);\
         \           password = input(HTTP_pass);\
