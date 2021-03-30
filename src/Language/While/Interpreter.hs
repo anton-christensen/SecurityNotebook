@@ -304,14 +304,16 @@ ptrArith v1 bop v2 = throwError $ concat ["Illegal pointer arithmetic: "
 evalBinOp :: Val -> BinOp -> Val -> Interp Val
 evalBinOp (N i1) Plus  (N i2) = return $ N (i1 + i2)
 evalBinOp (N i1) Minus (N i2) = return $ N (i1 - i2)
-evalBinOp (N i1) Mult (N i2) = return $ N (i1 * i2)
-evalBinOp (N i1) Div (N i2) = return $ N (i1 `div` i2)
+evalBinOp (N i1) Mult  (N i2) = return $ N (i1 * i2)
+evalBinOp (N i1) Div   (N i2) = return $ N (i1 `div` i2)
 evalBinOp (N i1) Eq    (N i2) = return $ b2n (i1 == i2)
 evalBinOp (N i1) Lt    (N i2) = return $ b2n (i1 < i2)
 evalBinOp (N i1) LE    (N i2) = return $ b2n (i1 <= i2)
 evalBinOp (N i1) Gt    (N i2) = return $ b2n (i1 > i2)
 evalBinOp (N i1) GE    (N i2) = return $ b2n (i1 >= i2)
 evalBinOp (S s1) Conc  (S s2) = return $ S (s1 ++ s2)
+evalBinOp (S s1) Plus  (N i2) = return $ S (s1 ++ (show i2))
+evalBinOp (N i1) Plus  (S s2) = return $ S ((show i1) ++ s2)
 evalBinOp (PTR p1) bop v2     = ptrArith (PTR p1) bop v2
 evalBinOp v1     bop   v2     = throwError $ concat ["Unsupported arithmetic operation: "
                                                     , (show v1)
@@ -320,6 +322,7 @@ evalBinOp v1     bop   v2     = throwError $ concat ["Unsupported arithmetic ope
                                                     , " "
                                                     , (show v2)
                                                     ]
+
 
 isBool :: Val -> Interp Bool
 isBool (N 0) = return False

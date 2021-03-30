@@ -56,6 +56,10 @@ comma = Token.comma lexer
 braces = Token.braces lexer
 strlit = Token.stringLiteral lexer
 
+parseLiteral :: Parser Expr
+parseLiteral = liftM (LIT . fromInteger) integer
+                 <|> liftM STR strlit
+
 program :: Parser Cmd
 program = do
   whiteSpace
@@ -225,8 +229,9 @@ terms =
   <|> derefexpr
   <|> castexpr
   <|> liftM VAR identifier
-  <|> liftM (LIT . fromInteger) integer
-  <|> liftM STR strlit
+  <|> parseLiteral
+  -- <|> liftM (LIT . fromInteger) integer
+  -- <|> liftM STR strlit
 
 --------------------------------------------------
 
