@@ -72,14 +72,14 @@ const markdownLatexRenderer = {
 }
 const markdownLatexTokenizer = {
   fences(src) { // ``` backticked code block ```
-    const cellRef = /^\@([^\[]+)(\[(\d+):(\d+)\])?/.exec(src);
+    const cellRef = /^\@([^\[]+)(\[(\d+):(\d+)\])?\n/.exec(src);
     const latexMath = /^ {0,3}(\${2})(?:|([\s\S]*?))(?: {0,3}\1 *(?:\n+|$)|$)/.exec(src);
     if (cellRef) {
       return {
         type: 'code',
         lang: 'cellRef',
         raw: cellRef[0],
-        text: {alias: cellRef[1], fstln: cellRef[3], lastln: cellRef[4]},
+        text: {alias: cellRef[1].trim(), fstln: cellRef[3], lastln: cellRef[4]},
       }
     }
     if (latexMath) {
