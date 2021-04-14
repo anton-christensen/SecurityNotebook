@@ -75,7 +75,6 @@ export default {
         JSON.stringify(this.req)
       )
       .then(function (response) {
-        console.log(response.data);
         var data = response.data;
         self.response.success = data.success;
         self.response.message = data.message;

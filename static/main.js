@@ -50,6 +50,13 @@ const markdownLatexRenderer = {
     if(lang == "katex") {
       return katex.renderToString(code, {throwOnError: false, output: "html", displayMode: true});
     }
+    if(lang == "cellRef") {
+      var {alias,fstln,lastln} = code;
+      if(fstln)
+        return `<pre><code cellref="${alias}" startline="${fstln}" endline="${lastln}"></code></pre>`;
+      else 
+        return `<pre><code cellref="${alias}"></code></pre>`;
+    }
     return false;
   },
 
@@ -65,13 +72,22 @@ const markdownLatexRenderer = {
 }
 const markdownLatexTokenizer = {
   fences(src) { // ``` backticked code block ```
-    const cap = /^ {0,3}(\${2})(?:|([\s\S]*?))(?: {0,3}\1 *(?:\n+|$)|$)/.exec(src);
-    if (cap) {
+    const cellRef = /^\@([^\[]+)(\[(\d+):(\d+)\])?/.exec(src);
+    const latexMath = /^ {0,3}(\${2})(?:|([\s\S]*?))(?: {0,3}\1 *(?:\n+|$)|$)/.exec(src);
+    if (cellRef) {
+      return {
+        type: 'code',
+        lang: 'cellRef',
+        raw: cellRef[0],
+        text: {alias: cellRef[1], fstln: cellRef[3], lastln: cellRef[4]},
+      }
+    }
+    if (latexMath) {
       return {
         type: 'code',
         lang: 'katex',
-        raw: cap[0],
-        text: cap[2]
+        raw: latexMath[0],
+        text: latexMath[2]
       };
     }
     // return false to use original tokenizer
