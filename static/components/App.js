@@ -22,21 +22,24 @@ export default {
         <div class="app-body">
           <div class="header">
             <div class="main-container">
-              <div class="fl">
-                <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
-              </div>
               <div v-if="filesystemSupported" class="fr hideInPrint" style="margin-top: 0.5rem">
                 <button v-on:click="editMode = !editMode">{{editMode ? 'Display Mode' : 'Edit Mode'}}</button>
                 <button v-on:click="newDocument">New</button>
                 <button v-on:click="saveDocument" v-bind:disabled="filesystemMode == 'browser'">Save{{(documentChanged ? " *" : "")}}</button>
                 <button v-on:click="saveDocumentAs">Save as</button>
                 <button v-on:click="importDocument">Open</button>
+                <a target="_blank" href="/static/docs.html"><button>Help</button></a>
               </div>
               <div v-else class="fr hideInPrint" style="margin-top: 0.5rem">
                 <button v-on:click="editMode = !editMode">{{editMode ? 'Display Mode' : 'Edit Mode'}}</button>
                 <button v-on:click="newDocument">New</button>
                 <button v-on:click="importDocument">Open</button>
                 <button v-on:click="exportDocument">Export</button>
+                <a target="_blank" href="/static/docs.html"><button>Help</button></a>
+              </div>
+              <div class="clear"></div>
+              <div class="fl">
+                <h1 contenteditable v-on:input="onTitleInput" ref="title">Security Analysis Notebook</h1>
               </div>
             </div>
           </div>

@@ -16,6 +16,9 @@ body,html {
 
   background-color: white;
   color: #404040;
+
+  -moz-tab-size: 4;
+  tab-size: 4;
 }
 
 .preventScroll {
@@ -118,7 +121,9 @@ hr {
 }
 
 .header h1 {
-  display: inline;
+  display: inline-block;
+  margin: 0;
+  margin-top: 1rem;
 }
 
 .menu {
@@ -416,6 +421,41 @@ ion-icon {
 a {
   color: #597fa6;
 }
+
+
+
+.markdownDisplay table {
+  border-collapse: collapse;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-left: none;
+  border-right: none;
+  margin: 0 auto;
+  margin-block-start: 17px;
+  margin-block-end: 17px;
+}
+
+.markdownDisplay table > thead {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.markdownDisplay table > tbody td {
+  font-family: Roboto Mono, monospace;
+  font-size: 0.75rem;
+}
+
+.markdownDisplay table td,
+.markdownDisplay table th {
+  padding: 0.2rem 0.5rem;
+}
+
+.markdownDisplay table > tbody tr:hover {
+  background-color: rgba(224, 203, 158, 0.15);
+}
+.markdownDisplay table pre {
+  white-space: pre;
+}
+
+
 .markdownDisplay pre > code {
   display: block;
 }

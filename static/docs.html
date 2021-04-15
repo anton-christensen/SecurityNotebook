@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Documentation | Security Analysis Notebook</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/icon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/icon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/icon/favicon-16x16.png">
+  <link rel="manifest" href="/static/icon/site.webmanifest">
+  
+  <!-- Vue js app framework -->
+  <script src="/static/lib/vue/2.6.12/vue.min.js"></script>
+
+  <!-- Axios HTTP client lib for AJAX requests -->
+  <script src="/static/lib/axios/0.21.1/axios.min.js"></script>
+
+
+  <!-- graphviz for dot diagrams -->
+  <script src="/static/lib/d3.v5.min.js"></script>
+  <script src="/static/lib/@hpcc-js/wasm@0.3.11/index.min.js"></script>
+  <script src="/static/lib/d3-graphviz@3.1.0/d3-graphviz.min.js"></script>
+
+  <!-- code text editor -->
+  <script src="/static/lib/codemirror@5.59.2/codemirror.js"></script>
+  <link  href="/static/lib/codemirror@5.59.2/codemirror.css" rel="stylesheet">
+  
+  <!-- markdown compiler -->
+  <script src="/static/lib/marked/2.0.0/marked.min.js"></script>
+
+  <!-- katex for latex math -->
+  <script src="/static/lib/katex@0.12.0/katex.min.js"></script>
+  <link href="/static/lib/katex@0.12.0/katex.min.css" rel="stylesheet">
+
+  <!-- Icon pack -->
+  <script src="/static/lib/ionicons@5.5.0/ionicons.esm.js" type="module"></script>
+  <script src="/static/lib//ionicons@5.5.0/ionicons.js" nomodule=""></script>
+
+  <!-- code highlighting -->
+  <script src="/static/lib/highlight.js/10.6.0/highlight.min.js"></script>
+  <!-- -- theme -->
+  <link rel="stylesheet" href="/static/lib/highlight.js/10.6.0/arduino-light.min.css"/>
+  
+  
+  <link rel="stylesheet" href="/static/style.css">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link rel="stylesheet" href="/static/lib/googlefonts/fonts.css" />
+  
+  <style>
+      #return {
+        display:inline-block;
+        float:left;
+      }
+      #return > ion-icon {
+        color: black;
+        width: 2rem;
+        height: 2rem;
+        padding: 1rem;
+      }
+  </style>
+</head>
+<body>
+
+  <a id="return" class="showOnHover" href="/"><ion-icon name="return-down-back-outline"></ion-icon></a>
+  <div class="main-container markdownDisplay" id="main">
+
+  </div>
+</body>
+<script>
+(function() {
+marked.setOptions({
+  langPrefix: "",
+  highlight: function(code, lang) {
+    if(lang == "plaintext")
+      return code;
+    if(hljs.listLanguages().indexOf(lang) == -1)
+      return hljs.highlightAuto(code).value;
+    return hljs.highlightAuto(code,[lang]).value;
+  }
+});
+const markdownLatexRenderer = {
+  code(code, lang) {
+    if(lang == "katex") {
+      return katex.renderToString(code, {throwOnError: false, output: "html", displayMode: true});
+    }
+    if(lang == "cellRef") {
+      var {alias,fstln,lastln} = code;
+      if(fstln)
+        return `<pre><code cellref="${alias}" startline="${fstln}" endline="${lastln}"></code></pre>`;
+      else 
+        return `<pre><code cellref="${alias}"></code></pre>`;
+    }
+    return false;
+  },
+
+  codespan(code) {
+    if(code.startsWith("§KaTeXInLiNe§")) {
+      code = code.substr("§KaTeXInLiNe§".length);
+      return katex.renderToString(code, {throwOnError: false, output: "html", displayMode: false});
+    }
+    else {
+      return false;
+    }
+  },
+}
+const markdownLatexTokenizer = {
+  fences(src) { // ``` backticked code block ```
+    const cellRef = /^\@([^\[]+)(\[(\d+):(\d+)\])?\n/.exec(src);
+    const latexMath = /^ {0,3}(\${2})(?:|([\s\S]*?))(?: {0,3}\1 *(?:\n+|$)|$)/.exec(src);
+    if (cellRef) {
+      return {
+        type: 'code',
+        lang: 'cellRef',
+        raw: cellRef[0],
+        text: {alias: cellRef[1].trim(), fstln: cellRef[3], lastln: cellRef[4]},
+      }
+    }
+    if (latexMath) {
+      return {
+        type: 'code',
+        lang: 'katex',
+        raw: latexMath[0],
+        text: latexMath[2]
+      };
+    }
+    // return false to use original tokenizer
+    return false;
+  },
+  codespan(src) {
+    const cap = /^(\${1,2})([^\$]|[^\$][\s\S]*?[^\$])\1(?!\$)/.exec(src);
+    if (cap) {
+      return {
+        type: 'codespan',
+        raw: cap[0],
+        text: "§KaTeXInLiNe§"+cap[2]
+      };
+    }
+    return false;
+  },
+  inlineText(src, inRawBlock, smartypants) {
+    const cap = /^(`+|[^`])(?:(?= {2,}\n)|[\s\S]*?(?:(?=[\$\\<!\[`*_]|\b_|$)|[^ ](?= {2,}\n)))/.exec(src);
+    if (cap) {
+      let text;
+      text = cap[0];
+      return {
+        type: 'text',
+        raw: cap[0],
+        text
+      };
+    }
+    return false;
+  }
+};
+marked.use({ tokenizer: markdownLatexTokenizer, renderer: markdownLatexRenderer });
+
+document.getElementById('main').innerHTML = marked(`
+# Table of Contents
+1. [Cells](#cells)
+    1. [Text Input](#text-input)
+    2. [Markdown Output](#markdown-output)
+    3. [GraphViz Output](#graphviz-output)
+    4. [Lattice Output](#lattice-output)
+    5. [Analysis Output](#analysis-output)
+    6. [While Interpreter Output](#while-interpreter-output)
+2. [Languages](#languages)
+    1. [Markdown](#markdown)
+    1. [While](#while)
+    2. [TinyARM](#tinyarm)
+    3. [TinyRISC](#tinyrisc)
+    4. [Lattice](#lattice)
+3. [Modes](#modes)
+    1. [Edit Mode](#edit-mode)
+    2. [Display Mode](#display-mode)
+    3. [Print](#print)
+
+
+
+
+
+
+# Cells
+A notebook is comprised of a list of cells.
+For the most part, writing a document means 
+adding an output cell and connecting it to a [Text Input](#text-input) 
+with text in the correct [language](#languages).
+In the top left corner of cells like the Markdown cell is a *reference* field where you indicate which cell supplies the input to the output cell.
+Cells can also be referenced by their ID number found in the top left corner.
+Right next to the ID number is where you set the alias of a cell.
+
+- Click the <ion-icon name="eye-off-outline"></ion-icon> icon in the top left corner of a cell to unfold it.
+- Click one of the <ion-icon name="add-outline"></ion-icon> icons where you want to insert a new cell.
+- Dragging the <ion-icon name="reorder-two-outline"></ion-icon> icon allows you to reorder cells.
+- The <ion-icon name="lock-open-outline"></ion-icon> icon locks a cell so you don't accidentally modify its content.
+- To delete a cell, click the <ion-icon name="close-outline"></ion-icon> icon in the top right corner.
+
+
+## Text Input
+Missing documentation ...
+
+---
+
+## Markdown Output
+The markdown output supports <a target="_blank" href="https://github.github.com/gfm/">Github flavoured markdown</a>
+as well as a few additions.
+
+These are $ \LaTeX $ math either inline like this: \`$ \\LaTeX $\`
+or as a block:
+\`\`\`latex
+$$ 
+\\LaTeX 
+$$
+\`\`\`
+
+Furthermore snippets of text inputs can be inserted by referencing its ID or alias as such:
+\`\`\`plaintext
+@alias[5:17]
+\`\`\`
+The brackets denote the range of lines from the text cell that should be inserted.
+
+---
+
+## GraphViz Output
+This cell renders a GraphViz diagram from <a target="_blank" href="https://graphviz.org/doc/info/lang.html">DOT notation</a>.
+
+---
+
+## Lattice Output
+This cell renders a lattice diagram from [Lattice notation](#lattice).
+
+---
+
+## Analysis Output
+Allows you to step through a number of different dataflow analyses.
+
+### TinyARM Reaching definitions analysis
+Missing documentation ...
+
+### TinyARM Liveness analysis
+Missing documentation ...
+
+### While CFG display for testing purposes
+Missing documentation ...
+
+### While taint analysis
+Missing documentation ...
+
+
+---
+
+## While Interpreter Output
+Executes up to 1000 steps of the supplied [While](#while) program.
+
+---
+
+# Languages
+## While
+### Examples 
+\`\`\`c
+secret = input(HIGH);
+while(secret > 0) {
+  secret = secret - 1;
+}
+output(42);
+\`\`\`
+
+### BNF
+The following is a description of the language in full.
+\`\`\`plaintext
+Bop ::= * | / | + | - | ++ | == | < | > | <= | >=
+Id ::= [a-zA-Z][a-zA-Z0-9_]*
+Num ::= ...
+Str ::= ...
+Exp ::= Num
+    |  "Str"
+    |  Id
+    |  Exp Bop Exp
+    |  *Exp
+    |  (Exp)
+Cmd ::= skip;
+    |  Id = Exp;
+    |  free(Exp);
+    |  Id = alloc(Exp);
+    |  output(Exp);
+    |  Id = input(Id);
+    |  *Exp = Exp;
+    |  if(Exp) Cmd [else Cmd]
+    |  while(Exp) Cmd
+    |  { Cmd ... Cmd }
+\`\`\`
+
+---
+
+## TinyARM
+Missing documentation...
+
+---
+
+## TinyRISC
+Missing documentation...
+
+---
+
+## Lattice
+A small language for rendering lattice diagrams
+
+### Examples
+#### Partially ordered set
+Square brackets encapsulate a list of ordered chains that form a partially ordered set.
+
+\`\`\`plaintext
+[ ⊥ < a < ⊤, ⊥ < b < ⊤ ]
+\`\`\`
+
+<div class="graph">
+digraph G {
+  graph [ pad="1", ranksep="1", nodesep="1", splines="line" ];
+  node [ shape="none", fixedsize=true, width=1, height=0.5 ];
+  edge [ arrowhead=none ];
+  
+    ID4425a689595347e98a9611091251c2b6[label="a"]
+    IDaf50f005e33c4b2d913def2d6d027310[label="b"]
+    ID9ca922ed7ecf48d0aeda3ef42611b9ee[label="⊤"]
+    IDec29be4102b84bf489452c7bea1e15d2[label="⊥"]
+    ID4425a689595347e98a9611091251c2b6 -> IDec29be4102b84bf489452c7bea1e15d2;
+    ID9ca922ed7ecf48d0aeda3ef42611b9ee -> ID4425a689595347e98a9611091251c2b6;
+    IDaf50f005e33c4b2d913def2d6d027310 -> IDec29be4102b84bf489452c7bea1e15d2;
+    ID9ca922ed7ecf48d0aeda3ef42611b9ee -> IDaf50f005e33c4b2d913def2d6d027310;
+
+}
+</div>
+
+#### Powerset
+Curly brackets can be used to define sets, and expressions can be assigned a name.
+A number of functions operate on sets and/or posets to create a lattice diagram.
+\`\`\`plaintext
+s = {x,y,z}
+P(s)
+\`\`\`
+
+<div class="graph">
+digraph G {
+  graph [ pad="1", ranksep="1", nodesep="1", splines="line" ];
+  node [ shape="none", fixedsize=true, width=1, height=0.5 ];
+  edge [ arrowhead=none ];
+  
+    ID3c753744f9fd48b7af8f65af0e04d00f[label="{x,y,z}"]
+    ID99baa41e383e459abff18a8affc8e3c9[label="{x,y}"]
+    ID4e309182b367444488b798036c007071[label="{x,z}"]
+    ID805230960ee544edb770ff6768987944[label="{x}"]
+    ID94ed2db1c95e4e19b95926e7651e9b6a[label="{y,z}"]
+    ID7ef83cd3e5764662a19832ae78b644fb[label="{y}"]
+    ID50159caf9cf6480d81df6deca7751947[label="{z}"]
+    ID7300f88fb7134940bff8bce82de56cc7[label="∅"]
+    ID3c753744f9fd48b7af8f65af0e04d00f -> ID99baa41e383e459abff18a8affc8e3c9;
+    ID3c753744f9fd48b7af8f65af0e04d00f -> ID4e309182b367444488b798036c007071;
+    ID99baa41e383e459abff18a8affc8e3c9 -> ID805230960ee544edb770ff6768987944;
+    ID4e309182b367444488b798036c007071 -> ID805230960ee544edb770ff6768987944;
+    ID3c753744f9fd48b7af8f65af0e04d00f -> ID94ed2db1c95e4e19b95926e7651e9b6a;
+    ID99baa41e383e459abff18a8affc8e3c9 -> ID7ef83cd3e5764662a19832ae78b644fb;
+    ID94ed2db1c95e4e19b95926e7651e9b6a -> ID7ef83cd3e5764662a19832ae78b644fb;
+    ID4e309182b367444488b798036c007071 -> ID50159caf9cf6480d81df6deca7751947;
+    ID94ed2db1c95e4e19b95926e7651e9b6a -> ID50159caf9cf6480d81df6deca7751947;
+    ID805230960ee544edb770ff6768987944 -> ID7300f88fb7134940bff8bce82de56cc7;
+    ID7ef83cd3e5764662a19832ae78b644fb -> ID7300f88fb7134940bff8bce82de56cc7;
+    ID50159caf9cf6480d81df6deca7751947 -> ID7300f88fb7134940bff8bce82de56cc7;
+
+}
+</div>
+
+#### Complex example
+The language also allows comments
+\`\`\`plaintext
+s = {a,b}
+r = [1<2]
+powerset = P(s)
+map = s -> r
+lifted = L(powerset)
+
+s2 = s X s
+r2 = r X r
+
+smash = (L(r)) ^ L(r)
+
+// the last line is what is rendered
+smash
+\`\`\`
+
+<div class="graph">
+    digraph G {
+  graph [ pad="1", ranksep="1", nodesep="1", splines="line" ];
+  node [ shape="none", fixedsize=true, width=1, height=0.5 ];
+  edge [ arrowhead=none ];
+  
+    ID645a563e34d848ceb46e240b22e71c2b[label="(1, 1)"]
+    ID7f377a2b9fdb4b2c9c1575a207ad66f1[label="(1, 2)"]
+    IDf9e72e5eb5234393a38d1ddea9020ea8[label="(2, 1)"]
+    IDe16336e317f1489da07835dc3d99db94[label="(2, 2)"]
+    ID141ae0d52b46483298755d8032b641c6[label="⊥"]
+    ID645a563e34d848ceb46e240b22e71c2b -> ID141ae0d52b46483298755d8032b641c6;
+    ID7f377a2b9fdb4b2c9c1575a207ad66f1 -> ID645a563e34d848ceb46e240b22e71c2b;
+    IDe16336e317f1489da07835dc3d99db94 -> IDf9e72e5eb5234393a38d1ddea9020ea8;
+    IDf9e72e5eb5234393a38d1ddea9020ea8 -> ID645a563e34d848ceb46e240b22e71c2b;
+    IDe16336e317f1489da07835dc3d99db94 -> ID7f377a2b9fdb4b2c9c1575a207ad66f1;
+
+}
+</div>
+
+
+### BNF
+The following is a description of the syntax in full.
+\`\`\`plaintext
+Statements = Statement Statements
+        | Statement
+
+Statement = Assignment
+        | Expression
+
+Assignment = Var '=' Expression
+
+Expression = Powerset
+        | Lift
+        | Map
+        | Product
+        | Value
+
+Value = '(' Expression ')' 
+    | Set
+    | Poset
+    | Var
+
+Powerset     = 'P' '(' Expression ')'
+Lift         = 'L' '(' Expression ')'
+Map          = Value '->' Expression
+Product      = Value 'X' Expression
+SmashProduct = Value '^' Expression
+Set          = '{' Vars '}' | '{' '}'
+Poset        = '[' Relations ']'
+
+Relations = Relation ',' Relations
+        | Relation
+Relation  = Var | Var '<' Relation
+
+Vars = Var ',' Vars
+    | Var
+
+Var = '"' <any string> '"'
+    | <any string without whitespace or reserved characters>
+
+Parser must check the following
+- Set: Set must not include duplicates
+- Map: Left side must be a set
+\`\`\`
+
+---
+
+
+# Modes
+## Edit Mode
+The default mode for editing notebook documents.
+
+## Display Mode
+Hides most UI elements to remove all that distracts from reading the document.
+
+## Print
+Pressing \`CTRL/⌘\`+\`P\` lets you print the document, with all UI elements hidden.
+
+`);
+let graphs = document.getElementsByClassName('graph');
+for(var i = 0; i < graphs.length; i++) {
+    d3.select(graphs[i]).graphviz().renderDot(graphs[i].textContent);
+    graphs[i].textContent = "";
+}
+
+})()
+</script>
+</html>
+
