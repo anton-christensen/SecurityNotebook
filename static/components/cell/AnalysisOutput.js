@@ -33,7 +33,7 @@ export default {
   watch: {
     text: function(newVal, oldVal) {
       this.req.programCode = newVal;
-      // this.reset(); // ? maybe this
+      this.reset();
       this.update();
     }
   },
@@ -78,7 +78,6 @@ export default {
     },
 
     reset: function() {
-      this.req.stepCount = 0;
       this.maxSteps = Infinity;
     },
 
